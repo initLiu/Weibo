@@ -5,7 +5,7 @@
  * should not be modified by hand.
  */
 
-package com.example.weibo;
+package com.lzp.weibo;
 
 public final class R {
     public static final class attr {
