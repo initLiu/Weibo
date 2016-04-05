@@ -3,15 +3,18 @@ package com.lzp.weibo.activity;
 import com.lzp.weibo.R;
 
 import android.os.Bundle;
+import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
 
 public class MainActivity extends BaseActivity implements OnClickListener {
 
-	private DrawerLayout mDrawer;
+	private DrawerLayout mDrawerLayout;
 	private View mTitlelayout;
+	private ActionBarDrawerToggle mDrawerToggle;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -21,24 +24,54 @@ public class MainActivity extends BaseActivity implements OnClickListener {
 	}
 
 	private void init() {
-		mDrawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+		mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 		mTitlelayout = findViewById(R.id.title_layout);
 		mTitlelayout.setOnClickListener(this);
+		mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
+				R.drawable.ic_drawer, R.string.openDrawer, R.string.closeDrawer) {
+
+			@Override
+			public void onDrawerClosed(View drawerView) {
+				// TODO Auto-generated method stub
+				super.onDrawerClosed(drawerView);
+			}
+
+			@Override
+			public void onDrawerOpened(View drawerView) {
+				// TODO Auto-generated method stub
+				super.onDrawerOpened(drawerView);
+			}
+
+		};
+		mDrawerLayout.setDrawerListener(mDrawerToggle);
 	}
 
 	@Override
 	public void onClick(View v) {
 		switch (v.getId()) {
 		case R.id.title_layout:
-			if (mDrawer.isDrawerOpen(Gravity.START)) {
-				mDrawer.closeDrawer(Gravity.START);
+			Log.e("Test", "title click");
+			if (mDrawerLayout.isDrawerOpen(Gravity.START)) {
+				mDrawerLayout.closeDrawer(Gravity.START);
 			} else {
-				mDrawer.openDrawer(Gravity.START);
+				mDrawerLayout.openDrawer(Gravity.START);
 			}
 			break;
 
 		default:
 			break;
+		}
+	}
+
+	public void closeDrawer() {
+		if (mDrawerLayout.isDrawerOpen(Gravity.START)) {
+			mDrawerLayout.closeDrawer(Gravity.START);
+		}
+	}
+
+	public void openDrawer() {
+		if (!mDrawerLayout.isDrawerOpen(Gravity.START)) {
+			mDrawerLayout.openDrawer(Gravity.START);
 		}
 	}
 }

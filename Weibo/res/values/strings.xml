@@ -7,5 +7,7 @@
     <string name="go_auth">去认证</string>
     <string name="drawer_pullout_tag" translatable="false">drawer_pullout</string>
     <string name="first_page">首页</string>
+    <string name="openDrawer">打开</string>
+    <string name="closeDrawer">关闭</string>
 
 </resources>
