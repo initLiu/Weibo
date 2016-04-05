@@ -1,9 +1,9 @@
 package com.lzp.weibo.activity;
 
-import android.app.Activity;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 
-public class BaseActivity extends Activity{
+public class BaseActivity extends FragmentActivity{
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
