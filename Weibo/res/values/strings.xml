@@ -5,5 +5,7 @@
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="go_auth">去认证</string>
+    <string name="drawer_pullout_tag" translatable="false">drawer_pullout</string>
+    <string name="first_page">首页</string>
 
 </resources>
