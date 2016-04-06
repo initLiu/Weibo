@@ -39,7 +39,7 @@ public class DrawerFragment extends Fragment implements OnClickListener {
 
 	private void init() {
 		switch (mCurPage.ordinal()) {
-		case 0:// ä¸»é¡µ
+		case 0:// Ê×Ò³
 			mBtnFrist.setSelected(true);
 			break;
 

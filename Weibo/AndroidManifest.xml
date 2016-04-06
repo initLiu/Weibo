@@ -39,6 +39,10 @@
         <activity
             android:name=".activity.MainActivity"
             android:exported="false" />
+        
+        <service
+            android:name=".net.MainService"
+            android:process=":mainservice" />
     </application>
 
 </manifest>
