@@ -9,9 +9,9 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 
-public class AppRuntime {
+public abstract class AppRuntime {
 	private Context mContext;
-	private IMsgRequest mNetService;
+	protected IMsgRequest mNetService;
 
 	private ServiceConnection conn = new ServiceConnection() {
 
@@ -25,7 +25,7 @@ public class AppRuntime {
 			mNetService = IMsgRequest.Stub.asInterface(service);
 		}
 	};
-
+	
 	public AppRuntime(Context context) {
 		mContext = context;
 	}

@@ -3,6 +3,9 @@ package com.lzp.weibo.net;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
+import android.os.RemoteException;
+
+import com.lzp.weibo.net.aidl.IMsgRequest;
 
 public class NetService extends Service {
 
@@ -22,8 +25,15 @@ public class NetService extends Service {
 
 	@Override
 	public IBinder onBind(Intent intent) {
-		// TODO Auto-generated method stub
-		return null;
+		return mBinder;
 	}
+
+	private final IMsgRequest.Stub mBinder = new IMsgRequest.Stub() {
+
+		@Override
+		public void sendRequest(String url) throws RemoteException {
+			
+		}
+	};
 
 }

@@ -41,8 +41,12 @@
             android:exported="false" />
         
         <service
-            android:name=".net.MainService"
-            android:process=":mainservice" />
+            android:name=".net.NetService"
+            android:process=":netservice" >
+            <intent-filter>
+                <action android:name="com.lzp.weibo.net.NetService"/>
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>

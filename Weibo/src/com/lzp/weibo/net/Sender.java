@@ -2,6 +2,8 @@ package com.lzp.weibo.net;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.JsonRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
 import android.content.Context;
@@ -30,6 +32,10 @@ public class Sender {
 		return mRequestQueue;
 	}
 
+	public void addToRequestQueue(String url){
+		StringRequest request = new StringRequest(url, listener, errorListener);
+	}
+	
 	public <T> void addToRequestQueue(Request<T> req) {
 		getRequestQueue().add(req);
 	}

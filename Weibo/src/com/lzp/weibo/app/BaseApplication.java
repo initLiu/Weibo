@@ -6,25 +6,22 @@ public class BaseApplication extends Application {
 
 	public static BaseApplication mApplication;
 	private AppRuntime mAppRuntime;
-	private AppInterface mAppinterface;
 
 	@Override
 	public void onCreate() {
 		super.onCreate();
 		mApplication = this;
-		mAppinterface = new AppInterface();
 		initRuntime();
 	}
 
-	public AppInterface getAppinterface() {
-		if (mAppinterface == null) {
-			mAppinterface = new AppInterface();
+	private void initRuntime() {
+		if (mAppRuntime == null) {
+			mAppRuntime = new AppInterface(getApplicationContext());
+			mAppRuntime.init();
 		}
-		return mAppinterface;
 	}
 
-	private void initRuntime() {
-		mAppRuntime = new AppRuntime(getApplicationContext());
-		mAppRuntime.init();
+	public AppRuntime getAppRuntime() {
+		return mAppRuntime;
 	}
 }
