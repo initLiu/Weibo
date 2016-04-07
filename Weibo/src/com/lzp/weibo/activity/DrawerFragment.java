@@ -1,6 +1,12 @@
 package com.lzp.weibo.activity;
 
 import com.lzp.weibo.R;
+import com.lzp.weibo.app.AccessTokenKeeper;
+import com.lzp.weibo.app.AppInterface;
+import com.lzp.weibo.app.BaseApplication;
+import com.lzp.weibo.msg.Command;
+import com.lzp.weibo.msg.ToServiceMsg;
+import com.sina.weibo.sdk.auth.Oauth2AccessToken;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -19,12 +25,23 @@ public class DrawerFragment extends Fragment implements OnClickListener {
 
 	private DrawerPage mCurPage = DrawerPage.fistePage;
 	private Button mBtnFrist;
+	private AppInterface mApp;
 
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-			Bundle savedInstanceState) {
-		View view = LayoutInflater.from(getActivity()).inflate(
-				R.layout.fragment_drawer, container, false);
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		mApp = (AppInterface) BaseApplication.mApplication.getAppRuntime();
+		Oauth2AccessToken token = AccessTokenKeeper.readAccessToken(getActivity());
+		ToServiceMsg msg = new ToServiceMsg();
+		msg.setCmd(Command.ower_users_show);
+		msg.setUrl(
+				"https://api.weibo.com/2/users/show.json?access_token=" + token.getToken() + "&uid=" + token.getUid());
+		mApp.getMessageFacade().sendRequest(msg);
+	}
+
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+		View view = LayoutInflater.from(getActivity()).inflate(R.layout.fragment_drawer, container, false);
 		return view;
 	}
 

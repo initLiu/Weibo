@@ -1,9 +1,10 @@
 package com.lzp.weibo.app;
 
+import com.lzp.weibo.msg.MessageFacade;
+import com.lzp.weibo.msg.ToServiceMsg;
+
 import android.content.Context;
 import android.os.RemoteException;
-
-import com.lzp.weibo.msg.MessageFacade;
 
 public class AppInterface extends AppRuntime {
 
@@ -21,7 +22,7 @@ public class AppInterface extends AppRuntime {
 		return mMessageFacade;
 	}
 
-	public void sendRequest(String url) throws RemoteException {
-		mNetService.sendRequest(url);
+	public void sendRequest(ToServiceMsg msg) throws RemoteException {
+		mNetService.sendRequest(msg);
 	}
 }
