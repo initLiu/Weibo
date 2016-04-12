@@ -1,29 +1,22 @@
 package com.lzp.weibo.msg;
 
 import com.lzp.weibo.app.AppInterface;
-import com.lzp.weibo.app.AppRuntime;
-import com.lzp.weibo.app.BaseApplication;
 
-import android.os.RemoteException;
+import android.text.TextUtils;
 
 public class MessageFacade {
 
-	public boolean sendRequest(ToServiceMsg msg) {
-		if (msg == null) {
+	private AppInterface mApp;
+
+	public MessageFacade(AppInterface app) {
+		mApp = app;
+	}
+
+	public boolean sendRequest(Command cmd, String url) {
+		if (TextUtils.isEmpty(url)) {
 			return false;
 		}
-		AppRuntime runtime = BaseApplication.mApplication.getAppRuntime();
-		if (!runtime.isServiceInit()) {
-			runtime.init();
-		}
-		if (runtime.isServiceInit()) {
-			try {
-				((AppInterface) runtime).sendRequest(msg);
-			} catch (RemoteException e) {
-				e.printStackTrace();
-				return false;
-			}
-		}
-		return false;
+
+		return mApp.getMessageHandler().SendMessageRequest(cmd, url);
 	}
 }

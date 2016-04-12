@@ -15,6 +15,7 @@ public class BaseResponseListener implements Listener<String>, ErrorListener {
 
 	@Override
 	public void onResponse(String response) {
+		
 	}
 
 	@Override

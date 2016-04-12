@@ -19,7 +19,7 @@ public class ResponListenerCreator {
 			return listeners.get(cmd.ordinal());
 		}
 
-		if (cmd == Command.ower_users_show) {
+		if (cmd == Command.owner_users_show) {
 			listeners.put(cmd.ordinal(), new OwnerUserShowResponseListener(netCore));
 			return listeners.get(cmd.ordinal());
 		}

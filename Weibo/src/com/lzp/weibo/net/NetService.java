@@ -8,7 +8,14 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.util.Log;
 
+/**
+ * 网络层的服务，接收业务层发来的消息，并且将服务器传来的数据传给业务层。
+ * 
+ * @author SKJP
+ *
+ */
 public class NetService extends Service {
 
 	private Sender mSender;
@@ -45,6 +52,7 @@ public class NetService extends Service {
 
 		@Override
 		public void sendRequest(ToServiceMsg msg) throws RemoteException {
+			Log.e("Test", "NetService sendRequest msg=" + msg);
 			if (msg != null) {
 				mSender.addToRequestQueue(msg);
 			}

@@ -10,6 +10,7 @@ import com.lzp.weibo.net.listener.BaseResponseListener;
 import com.lzp.weibo.net.listener.ResponListenerCreator;
 
 import android.content.Context;
+import android.util.Log;
 
 public class Sender {
 	private static Sender mInstance;
@@ -40,6 +41,7 @@ public class Sender {
 	}
 
 	public void addToRequestQueue(ToServiceMsg msg) {
+		Log.e("Test", "Sender addToRequestQueue mRequestQueue=" + mRequestQueue);
 		if (mRequestQueue != null) {
 			BaseResponseListener listener = mResponListenerCreator.createResponListener(msg.getCmd());
 			StringRequest request = new StringRequest(Method.GET, msg.getUrl(), listener, listener);

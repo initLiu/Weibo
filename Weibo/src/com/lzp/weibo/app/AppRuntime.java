@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.util.Log;
 
 public abstract class AppRuntime {
 	private Context mContext;
@@ -20,14 +21,17 @@ public abstract class AppRuntime {
 
 		@Override
 		public void onServiceDisconnected(ComponentName name) {
+			Log.e("Test", "AppRuntime onServiceDisconnected");
 			mNetService = null;
 		}
 
 		@Override
 		public void onServiceConnected(ComponentName name, IBinder service) {
+			Log.e("Test", "AppRuntime onServiceConnected");
 			mNetService = IMsgRequest.Stub.asInterface(service);
 			try {
 				mNetService.register(mCallback);
+				sendAll();
 			} catch (RemoteException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -39,15 +43,20 @@ public abstract class AppRuntime {
 
 		@Override
 		public void onResponse(ToAppMsg msg) throws RemoteException {
-
+			Log.e("Test", "AppRuntime onResponse msg=" + msg);
+			onReceive(msg);
 		}
 	};
+
+	protected abstract void onReceive(ToAppMsg msg);
+	protected abstract void sendAll();
 
 	public AppRuntime(Context context) {
 		mContext = context;
 	}
 
 	public void init() {
+		Log.e("Test", "AppRuntime init");
 		startNetService();
 		bindNetService();
 	}

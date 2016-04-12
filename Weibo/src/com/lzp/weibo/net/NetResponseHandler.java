@@ -28,5 +28,4 @@ public class NetResponseHandler extends Thread {
 			}
 		}
 	}
-
 }
