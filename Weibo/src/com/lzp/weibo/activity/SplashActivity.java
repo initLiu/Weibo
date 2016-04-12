@@ -6,7 +6,6 @@ import com.lzp.weibo.app.AppConstants;
 import com.lzp.weibo.app.AppInterface;
 import com.lzp.weibo.app.BaseApplication;
 import com.lzp.weibo.msg.Command;
-import com.lzp.weibo.msg.handler.UserShowHandler;
 import com.sina.weibo.sdk.auth.AuthInfo;
 import com.sina.weibo.sdk.auth.Oauth2AccessToken;
 import com.sina.weibo.sdk.auth.WeiboAuthListener;
@@ -118,9 +117,8 @@ public class SplashActivity extends BaseActivity {
 	private void getUserShow() {
 		Log.e("Test", "SplashActivity getUserShow");
 		AppInterface app = (AppInterface) BaseApplication.mApplication.getAppRuntime();
-		UserShowHandler usHandler = (UserShowHandler) app.getBusinessHandler(AppInterface.USERSHOW_HANDLER);
 		Oauth2AccessToken token = AccessTokenKeeper.readAccessToken(this);
-		usHandler.sendRequest(Command.owner_users_show,
+		app.getMessageFacade().sendRequest(Command.owner_users_show,
 				"https://api.weibo.com/2/users/show.json?access_token=" + token.getToken() + "&uid=" + token.getUid());
 	}
 }
