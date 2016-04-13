@@ -107,7 +107,6 @@ public class SplashActivity extends BaseActivity {
 		@Override
 		public void onWeiboException(WeiboException e) {
 			Toast.makeText(SplashActivity.this, "Auth exception : " + e.getMessage(), Toast.LENGTH_SHORT).show();
-
 		}
 	};
 

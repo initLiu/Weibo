@@ -47,6 +47,10 @@
                 <action android:name="com.lzp.weibo.net.NetService"/>
             </intent-filter>
         </service>
+        
+        <provider
+            android:name=".data.WeiboProvider"
+            android:authorities="com.lzp.weibo.data.WeiboProvider" />
     </application>
 
 </manifest>

@@ -23,4 +23,8 @@ public class MessageFacade {
 		}
 		return false;
 	}
+	
+	public void receiveResponse(Command cmd,String response){
+		
+	}
 }

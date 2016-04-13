@@ -18,7 +18,7 @@ public class UserShowHandler extends BusinessHandler {
 
 	@Override
 	public void onReceive(ToAppMsg msg) {
-		
+		mApp.getMessageFacade().receiveResponse(msg.getCmd(), msg.getResponse());
 	}
 
 	@Override
