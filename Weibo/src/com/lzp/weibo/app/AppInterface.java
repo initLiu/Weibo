@@ -2,13 +2,14 @@ package com.lzp.weibo.app;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import com.lzp.weibo.data.WeiboDatabaseManager;
 import com.lzp.weibo.msg.MessageFacade;
 import com.lzp.weibo.msg.ToAppMsg;
 import com.lzp.weibo.msg.ToServiceMsg;
 import com.lzp.weibo.msg.handler.BusinessHandler;
 import com.lzp.weibo.msg.handler.Cmd2HandlerMap;
 import com.lzp.weibo.msg.handler.MessageHandler;
-import com.lzp.weibo.msg.handler.UserShowHandler;
+import com.lzp.weibo.msg.handler.OwnerUserShowHandler;
 
 import android.content.Context;
 import android.os.RemoteException;
@@ -23,11 +24,19 @@ public class AppInterface extends AppRuntime {
 	private BusinessHandler[] mHandlers = new BusinessHandler[HANDLER_SIZE];
 	private MessageFacade mMessageFacade;
 	private MessageHandler mMessageHandler;
+	private WeiboDatabaseManager mdbManager;
 
 	private ConcurrentLinkedQueue<ToServiceMsg> msgQueue = new ConcurrentLinkedQueue<ToServiceMsg>();
 
 	public AppInterface(Context context) {
 		super(context);
+	}
+
+	public WeiboDatabaseManager getWeiboDatabaseManager() {
+		if (mdbManager == null) {
+			mdbManager = new WeiboDatabaseManager(getContext());
+		}
+		return mdbManager;
 	}
 
 	public MessageHandler getMessageHandler() {
@@ -66,7 +75,7 @@ public class AppInterface extends AppRuntime {
 			handler = mMessageHandler;
 			break;
 		case USERSHOW_HANDLER:
-			handler = new UserShowHandler(this);
+			handler = new OwnerUserShowHandler(this);
 			break;
 		default:
 			break;

@@ -9,21 +9,22 @@ import android.os.RemoteException;
 import android.text.TextUtils;
 import android.util.Log;
 
-public class UserShowHandler extends BusinessHandler {
+public class OwnerUserShowHandler extends BusinessHandler {
 
-	public UserShowHandler(AppInterface app) {
+	public OwnerUserShowHandler(AppInterface app) {
 		super(app);
 		// TODO Auto-generated constructor stub
 	}
 
 	@Override
 	public void onReceive(ToAppMsg msg) {
+		Log.e("Test", "OwnerUserShowHandler onReceive");
 		mApp.getMessageFacade().receiveResponse(msg.getCmd(), msg.getResponse());
 	}
 
 	@Override
 	public boolean sendRequest(ToServiceMsg msg) {
-		Log.e("Test", "UserShowHandler sendRequest");
+		Log.e("Test", "OwnerUserShowHandler sendRequest");
 		if (msg == null) {
 			return false;
 		}
@@ -37,7 +38,7 @@ public class UserShowHandler extends BusinessHandler {
 	}
 
 	public boolean sendRequest(Command cmd, String url) {
-		Log.e("Test", "UserShowHandler sendRequest cmd=" + cmd.name() + ",url=" + url);
+		Log.e("Test", "OwnerUserShowHandler sendRequest cmd=" + cmd.name() + ",url=" + url);
 		if (TextUtils.isEmpty(url)) {
 			return false;
 		}

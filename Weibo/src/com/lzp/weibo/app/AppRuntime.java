@@ -49,6 +49,7 @@ public abstract class AppRuntime {
 	};
 
 	protected abstract void onReceive(ToAppMsg msg);
+
 	protected abstract void sendAll();
 
 	public AppRuntime(Context context) {
@@ -73,5 +74,9 @@ public abstract class AppRuntime {
 
 	public boolean isServiceInit() {
 		return mNetService != null;
+	}
+
+	public Context getContext() {
+		return mContext;
 	}
 }

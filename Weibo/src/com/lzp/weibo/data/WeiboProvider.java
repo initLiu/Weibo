@@ -16,6 +16,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
+import android.util.Log;
 
 public class WeiboProvider extends ContentProvider {
 
@@ -31,7 +32,7 @@ public class WeiboProvider extends ContentProvider {
 
 	private DatabaseHelper mOpenHelper;
 
-	private static HashMap<String, String> sUsersProjectionMap;
+	private static HashMap<String, String> sUsersProjectionMap = new HashMap<String, String>();
 
 	private static final String USER_TABLE_NAME = "users";
 
@@ -98,8 +99,10 @@ public class WeiboProvider extends ContentProvider {
 			throw new IllegalArgumentException("Unknow URI " + uri);
 		}
 		rowId = db.insert(table, nullColumnHack, values);
+		Log.e("Test", "WeiboProvider insert rowid="+rowId);
 		if (rowId > 0) {
 			Uri newUri = ContentUris.withAppendedId(contentUri, rowId);
+			return newUri;
 		}
 		throw new SQLException("Failed to insert row into " + uri);
 	}
@@ -160,7 +163,7 @@ public class WeiboProvider extends ContentProvider {
 		default:
 			throw new IllegalArgumentException("Unknown URI " + uri);
 		}
-
+		Log.e("Test", "WeiboProvider delete count="+count);
 		getContext().getContentResolver().notifyChange(uri, null);
 		return count;
 	}
