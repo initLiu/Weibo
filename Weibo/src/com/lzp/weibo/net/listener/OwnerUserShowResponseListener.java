@@ -17,7 +17,13 @@ public class OwnerUserShowResponseListener extends BaseResponseListener {
 		Log.e("Test", "OwnerUserShowResponseListener onResponse");
 		ToAppMsg msg = new ToAppMsg();
 		msg.setCmd(Command.owner_users_show);
+		msg.setUrl(url);
 		msg.setResponse(response);
 		netCore.addResponseToQueue(msg);
+	}
+
+	@Override
+	protected void setUrl() {
+		url = "https://api.weibo.com/2/users/show.json?owner";
 	}
 }

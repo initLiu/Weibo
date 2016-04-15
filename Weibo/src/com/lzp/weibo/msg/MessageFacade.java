@@ -1,17 +1,20 @@
 package com.lzp.weibo.msg;
 
+import java.util.Observable;
+
+import org.json.JSONObject;
+
 import com.lzp.weibo.app.AppInterface;
 import com.lzp.weibo.data.DataItem;
-import com.lzp.weibo.data.WeiboDatabase.Users;
+import com.lzp.weibo.data.WeiboDatabase.Urls;
 import com.lzp.weibo.msg.handler.OwnerUserShowHandler;
-import com.sina.weibo.sdk.openapi.models.User;
 
 import android.content.ContentValues;
 import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 
-public class MessageFacade {
+public class MessageFacade extends Observable {
 
 	private AppInterface mApp;
 
@@ -31,44 +34,50 @@ public class MessageFacade {
 		return false;
 	}
 
-	public void receiveResponse(Command cmd, String response) {
+	public void receiveResponse(Command cmd, String reqUrl, String response) {
 		Log.e("Test", "MessageFacade receiveResponse");
-		insert2DB(cmd, response);
+		insert2DB(cmd, reqUrl, response);
 	}
 
 	/**
-	 * 保存到数据库中
+	 * 将url请求保存到数据库中
 	 * 
 	 * @param cmd
 	 * @param response
 	 */
-	private void insert2DB(Command cmd, String response) {
+	private void insert2DB(Command cmd, String reqUrl, String response) {
 		Log.e("Test", "MessageFacade insert2DB");
+		Uri uri = Urls.CONTENT_URI;
+
+		ContentValues values = new ContentValues();
+		values.put(Urls.URL, reqUrl);
+		values.put(Urls.CONTENT, response);
+
+		ContentValues valuestmp = new ContentValues();
+		valuestmp.put(Urls.CONTENT, response);
+
+		DataItem item = new DataItem();
+		item.uri = uri;
+		item.contentValues = values;
+		item.contentValuesTmp = valuestmp;
+		item.where = Urls.URL + " = ?";
+		item.selectionArgs = new String[] { reqUrl };
+		item.action = DataItem.ACTION_UPDATE_INSERT;
+		mApp.getWeiboDatabaseManager().addMsgQueue(item);
+		notifyUI(cmd, response);
+	}
+
+	private void notifyUI(Command cmd, String response) {
 		if (cmd == Command.owner_users_show) {
-			Uri uri = Users.CONTENT_URI;
-			User user = User.parse(response);
-
-			DataItem item = new DataItem();
-			item.uri = uri;
-			item.where = Users.AUTHOR_ID + " = ?";
-			item.selectionArgs = new String[] { user.id };
-			item.action = DataItem.ACTION_DELETE;
-			mApp.getWeiboDatabaseManager().addMsgQueue(item);
-
-			ContentValues values = new ContentValues();
-			values.put(Users.AUTHOR_ID, user.id);
-			values.put(Users.NAME, user.name);
-			values.put(Users.PROFILE_IMAGE_URL, user.profile_image_url);
-			values.put(Users.DESCRIPTION, user.description);
-			values.put(Users.FOLLOWERS_COUNT, user.followers_count);
-			values.put(Users.FRIENDS_COUNT, user.friends_count);
-			values.put(Users.STATUSES_COUNT, user.statuses_count);
-
-			item = new DataItem();
-			item.uri = uri;
-			item.contentValues = values;
-			item.action = DataItem.ACTION_INSERT;
-			mApp.getWeiboDatabaseManager().addMsgQueue(item);
+			try {
+				JSONObject owneruser = new JSONObject(response);
+				String url = owneruser.getString("profile_image_url");
+				setChanged();
+				notifyObservers(url);
+				Log.e("Test", "MessageFacade notifyUI");
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 	}
 }

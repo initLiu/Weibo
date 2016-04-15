@@ -2,7 +2,7 @@ package com.lzp.weibo.data;
 
 import java.util.HashMap;
 
-import com.lzp.weibo.data.WeiboDatabase.Users;
+import com.lzp.weibo.data.WeiboDatabase.Urls;
 
 import android.content.ContentProvider;
 import android.content.ContentUris;
@@ -34,24 +34,19 @@ public class WeiboProvider extends ContentProvider {
 
 	private static HashMap<String, String> sUsersProjectionMap = new HashMap<String, String>();
 
-	private static final String USER_TABLE_NAME = "users";
+	private static final String URL_TABLE_NAME = "urls";
 
-	private static final int USERS = 1;
-	private static final int USER_ID = 2;
+	private static final int URLS = 1;
+	private static final int URL_ID = 2;
 
 	static {
 		sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
-		sUriMatcher.addURI(AUTHORITY, USER_TABLE_NAME, USERS);
-		sUriMatcher.addURI(AUTHORITY, USER_TABLE_NAME + "/#", USER_ID);
+		sUriMatcher.addURI(AUTHORITY, URL_TABLE_NAME, URLS);
+		sUriMatcher.addURI(AUTHORITY, URL_TABLE_NAME + "/#", URL_ID);
 
-		sUsersProjectionMap.put(Users._ID, Users._ID);
-		sUsersProjectionMap.put(Users.AUTHOR_ID, Users.AUTHOR_ID);
-		sUsersProjectionMap.put(Users.NAME, Users.NAME);
-		sUsersProjectionMap.put(Users.PROFILE_IMAGE_URL, Users.PROFILE_IMAGE_URL);
-		sUsersProjectionMap.put(Users.DESCRIPTION, Users.DESCRIPTION);
-		sUsersProjectionMap.put(Users.FOLLOWERS_COUNT, Users.FOLLOWERS_COUNT);
-		sUsersProjectionMap.put(Users.FRIENDS_COUNT, Users.FRIENDS_COUNT);
-		sUsersProjectionMap.put(Users.STATUSES_COUNT, Users.STATUSES_COUNT);
+		sUsersProjectionMap.put(Urls._ID, Urls._ID);
+		sUsersProjectionMap.put(Urls.URL, Urls.URL);
+		sUsersProjectionMap.put(Urls.CONTENT, Urls.CONTENT);
 	}
 
 	@Override
@@ -63,10 +58,10 @@ public class WeiboProvider extends ContentProvider {
 	@Override
 	public String getType(Uri uri) {
 		switch (sUriMatcher.match(uri)) {
-		case USERS:
-			return Users.CONTENT_TYPE;
-		case USER_ID:
-			return Users.CONTENT_ITEM_TYPE;
+		case URLS:
+			return Urls.CONTENT_TYPE;
+		case URL_ID:
+			return Urls.CONTENT_ITEM_TYPE;
 		default:
 			throw new IllegalArgumentException("Unknown URI " + uri);
 		}
@@ -79,7 +74,6 @@ public class WeiboProvider extends ContentProvider {
 		SQLiteDatabase db = mOpenHelper.getWritableDatabase();
 
 		String table;
-		String nullColumnHack;
 		Uri contentUri;
 
 		if (initialValues != null) {
@@ -89,17 +83,16 @@ public class WeiboProvider extends ContentProvider {
 		}
 
 		switch (sUriMatcher.match(uri)) {
-		case USERS:
-			table = USER_TABLE_NAME;
-			nullColumnHack = Users.AUTHOR_ID;
-			contentUri = Users.CONTENT_URI;
+		case URLS:
+			table = URL_TABLE_NAME;
+			contentUri = Urls.CONTENT_URI;
 			break;
 
 		default:
 			throw new IllegalArgumentException("Unknow URI " + uri);
 		}
-		rowId = db.insert(table, nullColumnHack, values);
-		Log.e("Test", "WeiboProvider insert rowid="+rowId);
+		rowId = db.insert(table, null, values);
+		Log.e("Test", "WeiboProvider insert rowid=" + rowId);
 		if (rowId > 0) {
 			Uri newUri = ContentUris.withAppendedId(contentUri, rowId);
 			return newUri;
@@ -114,8 +107,8 @@ public class WeiboProvider extends ContentProvider {
 
 		int matchedCode = sUriMatcher.match(uri);
 		switch (matchedCode) {
-		case USERS:
-			qb.setTables(USER_TABLE_NAME);
+		case URLS:
+			qb.setTables(URL_TABLE_NAME);
 			qb.setProjectionMap(sUsersProjectionMap);
 			break;
 
@@ -126,8 +119,8 @@ public class WeiboProvider extends ContentProvider {
 		String orderBy;
 		if (TextUtils.isEmpty(sortOrder)) {
 			switch (matchedCode) {
-			case USERS:
-				orderBy = Users.DEFAULTSORT_ORDER;
+			case URLS:
+				orderBy = Urls.DEFAULTSORT_ORDER;
 				break;
 
 			default:
@@ -156,14 +149,14 @@ public class WeiboProvider extends ContentProvider {
 		SQLiteDatabase db = mOpenHelper.getWritableDatabase();
 		int count;
 		switch (sUriMatcher.match(uri)) {
-		case USERS:
-			count = db.delete(USER_TABLE_NAME, selection, selectionArgs);
+		case URLS:
+			count = db.delete(URL_TABLE_NAME, selection, selectionArgs);
 			break;
 
 		default:
 			throw new IllegalArgumentException("Unknown URI " + uri);
 		}
-		Log.e("Test", "WeiboProvider delete count="+count);
+		Log.e("Test", "WeiboProvider delete count=" + count);
 		getContext().getContentResolver().notifyChange(uri, null);
 		return count;
 	}
@@ -173,8 +166,8 @@ public class WeiboProvider extends ContentProvider {
 		SQLiteDatabase db = mOpenHelper.getWritableDatabase();
 		int count;
 		switch (sUriMatcher.match(uri)) {
-		case USERS:
-			count = db.update(USER_TABLE_NAME, values, selection, selectionArgs);
+		case URLS:
+			count = db.update(URL_TABLE_NAME, values, selection, selectionArgs);
 			break;
 
 		default:
@@ -184,7 +177,6 @@ public class WeiboProvider extends ContentProvider {
 	}
 
 	private static class DatabaseHelper extends SQLiteOpenHelper {
-		private SQLiteDatabase mDatabase;
 
 		public DatabaseHelper(Context context) {
 			super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -193,17 +185,15 @@ public class WeiboProvider extends ContentProvider {
 
 		@Override
 		public void onCreate(SQLiteDatabase db) {
-			db.execSQL("CREATE TABLE " + USER_TABLE_NAME + " (" + Users._ID + " INTEGER PRIMARY KEY," + Users.AUTHOR_ID
-					+ " TEXT," + Users.NAME + " TEXT," + Users.PROFILE_IMAGE_URL + " TEXT," + Users.DESCRIPTION
-					+ " TEXT," + Users.FOLLOWERS_COUNT + " INTEGER," + Users.FRIENDS_COUNT + " INTEGER,"
-					+ Users.STATUSES_COUNT + " INTEGER);");
+			db.execSQL("CREATE TABLE " + URL_TABLE_NAME + " (" + Urls._ID + " INTEGER PRIMARY KEY," + Urls.URL
+					+ " TEXT NOT NULL," + Urls.CONTENT + " TEXT);");
 		}
 
 		@Override
 		public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 			db.beginTransaction();
 			try {
-				db.execSQL("DROP TABLE " + USER_TABLE_NAME + ";");
+				db.execSQL("DROP TABLE " + URL_TABLE_NAME + ";");
 				db.setTransactionSuccessful();
 			} catch (Exception e) {
 				e.printStackTrace();

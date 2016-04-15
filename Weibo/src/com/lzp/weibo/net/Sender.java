@@ -44,6 +44,7 @@ public class Sender {
 		Log.e("Test", "Sender addToRequestQueue mRequestQueue=" + mRequestQueue);
 		if (mRequestQueue != null) {
 			BaseResponseListener listener = mResponListenerCreator.createResponListener(msg.getCmd());
+			
 			StringRequest request = new StringRequest(Method.GET, msg.getUrl(), listener, listener);
 			addToRequestQueue(request);
 		}

@@ -19,7 +19,7 @@ public class OwnerUserShowHandler extends BusinessHandler {
 	@Override
 	public void onReceive(ToAppMsg msg) {
 		Log.e("Test", "OwnerUserShowHandler onReceive");
-		mApp.getMessageFacade().receiveResponse(msg.getCmd(), msg.getResponse());
+		mApp.getMessageFacade().receiveResponse(msg.getCmd(), msg.getUrl(), msg.getResponse());
 	}
 
 	@Override

@@ -9,7 +9,11 @@ public class NetCore {
 	private LinkedBlockingQueue<ToAppMsg> msgQueue = new LinkedBlockingQueue<ToAppMsg>();
 
 	public void addResponseToQueue(ToAppMsg msg) {
-		msgQueue.add(msg);
+		try {
+			msgQueue.put(msg);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public LinkedBlockingQueue<ToAppMsg> getMsgQueue() {

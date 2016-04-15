@@ -5,6 +5,7 @@ import android.os.Parcelable;
 
 public class ToAppMsg implements Parcelable {
 	private String response;
+	private String url;
 	private Command cmd;
 
 	public ToAppMsg() {
@@ -30,6 +31,14 @@ public class ToAppMsg implements Parcelable {
 		this.cmd = cmd;
 	}
 
+	public void setUrl(String url) {
+		this.url = url;
+	}
+
+	public String getUrl() {
+		return url;
+	}
+
 	@Override
 	public int describeContents() {
 		// TODO Auto-generated method stub
@@ -39,11 +48,13 @@ public class ToAppMsg implements Parcelable {
 	@Override
 	public void writeToParcel(Parcel dest, int flags) {
 		dest.writeString(response);
+		dest.writeString(url);
 		dest.writeSerializable(cmd);
 	}
 
 	private void readFromParcel(Parcel in) {
 		response = in.readString();
+		url = in.readString();
 		cmd = (Command) in.readSerializable();
 	}
 
