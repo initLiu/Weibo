@@ -8,26 +8,26 @@ import com.lzp.weibo.msg.ToServiceMsg;
 import android.text.TextUtils;
 import android.util.Log;
 
-public class OwnerUserShowHandler extends BusinessHandler {
+public class FriendsTimelineHandler extends BusinessHandler{
 
-	public OwnerUserShowHandler(AppInterface app) {
+	public FriendsTimelineHandler(AppInterface app) {
 		super(app);
 		// TODO Auto-generated constructor stub
 	}
 
 	@Override
 	public void onReceive(ToAppMsg msg) {
-		Log.e("Test", "OwnerUserShowHandler onReceive");
-		mApp.getMessageFacade().receiveResponse(msg.getCmd(), msg.getUrl(), msg.getResponse());
+		// TODO Auto-generated method stub
+		
 	}
 
 	public boolean sendRequest(Command cmd, String url) {
-		Log.e("Test", "OwnerUserShowHandler sendRequest cmd=" + cmd.name() + ",url=" + url);
+		Log.e("Test", "FriendsTimelineHandler sendRequest cmd=" + cmd.name() + ",url=" + url);
 		if (TextUtils.isEmpty(url)) {
 			return false;
 		}
 		ToServiceMsg msg = new ToServiceMsg();
-		msg.setCmd(Command.owner_users_show);
+		msg.setCmd(Command.friends_timeline);
 		msg.setUrl(url);
 		return sendRequest(msg);
 	}

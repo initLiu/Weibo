@@ -22,6 +22,9 @@ public class ResponListenerCreator {
 		if (cmd == Command.owner_users_show) {
 			listeners.put(cmd.ordinal(), new OwnerUserShowResponseListener(netCore));
 			return listeners.get(cmd.ordinal());
+		} else if (cmd == Command.friends_timeline) {
+			listeners.put(cmd.ordinal(), new FriendsTimelineListener(netCore));
+			return listeners.get(cmd.ordinal());
 		}
 		return null;
 	}

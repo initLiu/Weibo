@@ -4,6 +4,8 @@ import com.lzp.weibo.R;
 
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.Gravity;
@@ -27,23 +29,23 @@ public class MainActivity extends BaseActivity implements OnClickListener {
 		mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 		mTitlelayout = findViewById(R.id.title_layout);
 		mTitlelayout.setOnClickListener(this);
-//		mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
-//				R.drawable.ic_drawer, R.string.openDrawer, R.string.closeDrawer) {
-//
-//			@Override
-//			public void onDrawerClosed(View drawerView) {
-//				// TODO Auto-generated method stub
-//				super.onDrawerClosed(drawerView);
-//			}
-//
-//			@Override
-//			public void onDrawerOpened(View drawerView) {
-//				// TODO Auto-generated method stub
-//				super.onDrawerOpened(drawerView);
-//			}
-//
-//		};
-//		mDrawerLayout.setDrawerListener(mDrawerToggle);
+		// mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
+		// R.drawable.ic_drawer, R.string.openDrawer, R.string.closeDrawer) {
+		//
+		// @Override
+		// public void onDrawerClosed(View drawerView) {
+		// // TODO Auto-generated method stub
+		// super.onDrawerClosed(drawerView);
+		// }
+		//
+		// @Override
+		// public void onDrawerOpened(View drawerView) {
+		// // TODO Auto-generated method stub
+		// super.onDrawerOpened(drawerView);
+		// }
+		//
+		// };
+		// mDrawerLayout.setDrawerListener(mDrawerToggle);
 	}
 
 	@Override
@@ -73,5 +75,11 @@ public class MainActivity extends BaseActivity implements OnClickListener {
 		if (!mDrawerLayout.isDrawerOpen(Gravity.START)) {
 			mDrawerLayout.openDrawer(Gravity.START);
 		}
+	}
+
+	public void changeDrawerPagePosition(Fragment fragment, String tag) {
+		FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+		transaction.replace(R.id.content, fragment, tag);
+		transaction.commitAllowingStateLoss();
 	}
 }

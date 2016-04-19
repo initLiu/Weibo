@@ -13,8 +13,9 @@
 
         <ImageView
             android:id="@+id/drawer_header"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
             android:scaleType="center"
             android:src="@drawable/ic_weibo" />
     </LinearLayout>

@@ -1,6 +1,7 @@
 package com.lzp.weibo.net.listener;
 
 import com.lzp.weibo.msg.Command;
+import com.lzp.weibo.msg.RequestUrlContasts;
 import com.lzp.weibo.msg.ToAppMsg;
 import com.lzp.weibo.net.NetCore;
 
@@ -24,6 +25,6 @@ public class OwnerUserShowResponseListener extends BaseResponseListener {
 
 	@Override
 	protected void setUrl() {
-		url = "https://api.weibo.com/2/users/show.json?owner";
+		url = RequestUrlContasts.OWNER_USER_SHOW;
 	}
 }

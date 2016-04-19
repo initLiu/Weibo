@@ -3,9 +3,6 @@ package com.lzp.weibo.activity;
 import com.lzp.weibo.R;
 import com.lzp.weibo.app.AccessTokenKeeper;
 import com.lzp.weibo.app.AppConstants;
-import com.lzp.weibo.app.AppInterface;
-import com.lzp.weibo.app.BaseApplication;
-import com.lzp.weibo.msg.Command;
 import com.sina.weibo.sdk.auth.AuthInfo;
 import com.sina.weibo.sdk.auth.Oauth2AccessToken;
 import com.sina.weibo.sdk.auth.WeiboAuthListener;
@@ -14,7 +11,6 @@ import com.sina.weibo.sdk.exception.WeiboException;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.animation.AlphaAnimation;
@@ -56,7 +52,6 @@ public class SplashActivity extends BaseActivity {
 	}
 
 	private void gotoMainView() {
-		getUserShow();
 		Intent intent = new Intent(this, MainActivity.class);
 		startActivity(intent);
 		finish();
@@ -109,15 +104,4 @@ public class SplashActivity extends BaseActivity {
 			Toast.makeText(SplashActivity.this, "Auth exception : " + e.getMessage(), Toast.LENGTH_SHORT).show();
 		}
 	};
-
-	/**
-	 * 获取账号信息，包括头像、昵称等 https://api.weibo.com/2/users/show.json
-	 */
-	private void getUserShow() {
-		Log.e("Test", "SplashActivity getUserShow");
-		AppInterface app = (AppInterface) BaseApplication.mApplication.getAppRuntime();
-		Oauth2AccessToken token = AccessTokenKeeper.readAccessToken(this);
-		app.getMessageFacade().sendRequest(Command.owner_users_show,
-				"https://api.weibo.com/2/users/show.json?access_token=" + token.getToken() + "&uid=" + token.getUid());
-	}
 }

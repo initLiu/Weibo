@@ -102,6 +102,7 @@ public class WeiboProvider extends ContentProvider {
 
 	@Override
 	public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+		Log.e("Test", "WeiboProvider query");
 		SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
 		String sql = "";
 

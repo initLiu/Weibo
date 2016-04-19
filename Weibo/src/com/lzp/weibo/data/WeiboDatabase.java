@@ -15,7 +15,7 @@ public class WeiboDatabase {
 		public static final Uri CONTENT_URI = Uri.parse("content://" + WeiboProvider.AUTHORITY + "/urls");
 		public static final String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.weibo.urls";
 		public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.weibo.urls";
-		public static final String DEFAULTSORT_ORDER = "";
+		public static final String DEFAULTSORT_ORDER = "_id ASC";
 
 		// public static final String AUTHOR_ID = "author_id";
 		// public static final String NAME = "name";
