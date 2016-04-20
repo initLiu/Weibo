@@ -1,6 +1,5 @@
 package com.lzp.weibo.msg;
 
-import java.util.HashMap;
 import java.util.Observable;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -12,9 +11,9 @@ import com.lzp.weibo.data.DataItem;
 import com.lzp.weibo.data.WeiboDatabase.Urls;
 import com.lzp.weibo.msg.handler.FriendsTimelineHandler;
 import com.lzp.weibo.msg.handler.OwnerUserShowHandler;
+import com.sina.weibo.sdk.openapi.models.StatusList;
 
 import android.content.ContentValues;
-import android.database.Cursor;
 import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
@@ -22,11 +21,11 @@ import android.util.Log;
 public class MessageFacade extends Observable {
 
 	private AppInterface mApp;
-	private WeiboCache mUrlCache;
+	private WeiboCache mWeiboCache;
 
 	public MessageFacade(AppInterface app) {
 		mApp = app;
-		mUrlCache = WeiboCache.getUrlCacheInstance();
+		mWeiboCache = WeiboCache.getUrlCacheInstance();
 	}
 
 	/**
@@ -59,9 +58,11 @@ public class MessageFacade extends Observable {
 	 * @param reqUrl
 	 * @param response
 	 */
-	public void receiveResponse(Command cmd, String reqUrl, String response) {
+	public void receiveResponse(Command cmd, String cacheUrl, String response) {
 		Log.e("Test", "MessageFacade receiveResponse");
-		insert2DB(cmd, reqUrl, response);
+		insert2DB(cmd, cacheUrl, response);
+		insert2Cache(cmd, cacheUrl, response);
+		notifyUI(cmd, response);
 	}
 
 	/**
@@ -70,12 +71,12 @@ public class MessageFacade extends Observable {
 	 * @param cmd
 	 * @param response
 	 */
-	private void insert2DB(Command cmd, String reqUrl, String response) {
+	private void insert2DB(Command cmd, String cacheUrl, String response) {
 		Log.e("Test", "MessageFacade insert2DB");
 		Uri uri = Urls.CONTENT_URI;
 
 		ContentValues values = new ContentValues();
-		values.put(Urls.URL, reqUrl);
+		values.put(Urls.URL, cacheUrl);
 		values.put(Urls.CONTENT, response);
 
 		ContentValues valuestmp = new ContentValues();
@@ -86,10 +87,9 @@ public class MessageFacade extends Observable {
 		item.contentValues = values;
 		item.contentValuesTmp = valuestmp;
 		item.where = Urls.URL + " = ?";
-		item.selectionArgs = new String[] { reqUrl };
+		item.selectionArgs = new String[] { cacheUrl };
 		item.action = DataItem.ACTION_UPDATE_INSERT;
 		mApp.getWeiboDatabaseManager().addMsgQueue(item);
-		notifyUI(cmd, response);
 	}
 
 	/**
@@ -112,38 +112,59 @@ public class MessageFacade extends Observable {
 		}
 	}
 
-	public String getResponseFromCache(Command cmd) {
-		Log.e("Test", "MessageFacade getResponseFromCache");
-		ConcurrentHashMap<String, String> requestUrls = mUrlCache.getReuestUrls();
-		if (requestUrls == null || requestUrls.isEmpty()) {
-			initUrlCache();
-		}
+	/************************************ 缓存相关 ***********************************/
+	/*****************************************************************************/
+	/**
+	 * 将请求插入到缓存中
+	 * 
+	 * @param cmd
+	 * @param cacheUrl
+	 * @param response
+	 */
+	private void insert2Cache(Command cmd, String cacheUrl, String response) {
+		Log.e("Test", "MessageFacade insert2Cache");
+		// 缓存url请求
+		mWeiboCache.getReuestUrls().put(cacheUrl, response);
 
-		if (cmd == Command.owner_users_show) {
-			String url = RequestUrlContasts.OWNER_USER_SHOW;
-			if (!requestUrls.containsKey(url)) {
-				return null;
-			}
-			return requestUrls.get(url);
+		// 缓存url请求返回的数据
+		if (cmd == Command.owner_users_show) {// 账号信息
+
+		} else if (cmd == Command.friends_timeline) {// 微博列表
+			mWeiboCache.setStatusList(StatusList.parse(response));
 		}
-		return null;
 	}
 
-	private void initUrlCache() {
-		Log.e("Test", "MessageFacade initUrlCache");
-		ConcurrentHashMap<String, String> requestUrls = mUrlCache.getReuestUrls();
-		if (requestUrls == null || requestUrls.isEmpty()) {
-			Cursor cursor = mApp.getContext().getContentResolver().query(Urls.CONTENT_URI, null, null, null, null);
-			HashMap<String, String> tmpMap = new HashMap<String, String>();
-			if (cursor != null && cursor.getCount() > 0) {
-				cursor.moveToFirst();
-				do {
-					String requrl = cursor.getString(cursor.getColumnIndex(Urls.URL));
-					String response = cursor.getString(cursor.getColumnIndex(Urls.CONTENT));
-					tmpMap.put(requrl, response);
-				} while (cursor.moveToNext());
-			}
-			requestUrls.putAll(tmpMap);
+	/**
+	 * 从url缓存中取出之前的请求
+	 * 
+	 * @param cmd
+	 * @return response
+	 */
+	public String getResponseFromCache(Command cmd) {
+		Log.e("Test", "MessageFacade getResponseFromCache");
+		ConcurrentHashMap<String, String> requestUrls = mWeiboCache.getReuestUrls();
+		if (requestUrls == null) {
+			mWeiboCache.initWeiboCache();
 		}
+
+		String url = null;
+		if (cmd == Command.owner_users_show) {
+			url = RequestUrlContasts.OWNER_USER_SHOW;
+
+		} else if (cmd == Command.friends_timeline) {
+			url = RequestUrlContasts.FRIENDS_TIMELINE;
+		}
+
+		if (TextUtils.isEmpty(url) || !requestUrls.containsKey(url)) {
+			return null;
+		}
+		return requestUrls.get(url);
+	}
+
+	public StatusList getStatusListFromCache() {
+		if (mWeiboCache.getReuestUrls() == null) {
+			mWeiboCache.initWeiboCache();
+		}
+		return mWeiboCache.getStatusList();
 	}
 }

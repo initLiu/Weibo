@@ -8,7 +8,7 @@ import com.lzp.weibo.msg.ToServiceMsg;
 import android.text.TextUtils;
 import android.util.Log;
 
-public class FriendsTimelineHandler extends BusinessHandler{
+public class FriendsTimelineHandler extends BusinessHandler {
 
 	public FriendsTimelineHandler(AppInterface app) {
 		super(app);
@@ -17,8 +17,8 @@ public class FriendsTimelineHandler extends BusinessHandler{
 
 	@Override
 	public void onReceive(ToAppMsg msg) {
-		// TODO Auto-generated method stub
-		
+		Log.e("Test", "FriendsTimelineHandler onReceive");
+		mApp.getMessageFacade().receiveResponse(msg.getCmd(), msg.getUrl(), msg.getResponse());
 	}
 
 	public boolean sendRequest(Command cmd, String url) {

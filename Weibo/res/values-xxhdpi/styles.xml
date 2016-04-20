@@ -1,0 +1,18 @@
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <style name="text_username">
+        <item name="android:textSize">40px</item>
+        <item name="android:textColor">#FFA54F</item>
+    </style>
+
+    <style name="text_other">
+        <item name="android:textSize">30px</item>
+        <item name="android:textColor">#DBDBDB</item>
+    </style>
+
+    <style name="text_content">
+        <item name="android:textSize">50px</item>
+        <item name="android:textColor">#FFFFFF</item>
+    </style>
+
+</resources>

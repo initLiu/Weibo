@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="10dp"
+    android:paddingBottom="10dp"
+    android:paddingTop="10dp" >
+
+    <RelativeLayout
+        android:id="@+id/friend_status_user_layout"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" >
+
+        <ImageView
+            android:id="@+id/friend_status_face"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_weibo" />
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="10dp"
+            android:layout_toRightOf="@id/friend_status_face" >
+
+            <TextView
+                android:id="@+id/friend_status_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="微博"
+                style="@style/text_username" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_below="@id/friend_status_name" >
+
+                <TextView
+                    android:id="@+id/friend_status_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="昨天 15:50"
+                    style="@style/text_other" />
+                
+                <TextView
+                    android:id="@+id/friend_status_source"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:text="来自 微博"
+                    style="@style/text_other" />
+            </LinearLayout>
+        </RelativeLayout>
+    </RelativeLayout>
+    
+    <TextView
+        android:id="@+id/friend_status_content"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/friend_status_user_layout"
+        android:layout_marginTop="10dp"
+        android:text="世事无绝对。都说团结就是力量。全世界的鸡蛋联合起来就能打破石头吗？所以，还是要面对现实。"
+        style="@style/text_content" />
+    
+    <ImageView
+        android:id="@+id/friend_status_image"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_marginTop="10dp"
+        android:layout_below="@id/friend_status_content"
+        android:src="@drawable/friend_status_image_small" />
+
+</RelativeLayout>
