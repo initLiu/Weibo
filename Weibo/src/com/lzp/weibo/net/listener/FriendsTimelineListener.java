@@ -28,5 +28,4 @@ public class FriendsTimelineListener extends BaseResponseListener {
 	protected void setUrl() {
 		url = RequestUrlContasts.FRIENDS_TIMELINE;
 	}
-
 }

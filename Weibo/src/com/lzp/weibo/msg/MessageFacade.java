@@ -20,6 +20,7 @@ import android.util.Log;
 
 public class MessageFacade extends Observable {
 
+	private static final String TAG = MessageFacade.class.getSimpleName();
 	private AppInterface mApp;
 	private WeiboCache mWeiboCache;
 
@@ -59,7 +60,7 @@ public class MessageFacade extends Observable {
 	 * @param response
 	 */
 	public void receiveResponse(Command cmd, String cacheUrl, String response) {
-		Log.e("Test", "MessageFacade receiveResponse");
+		Log.e(TAG, "MessageFacade receiveResponse");
 		insert2DB(cmd, cacheUrl, response);
 		insert2Cache(cmd, cacheUrl, response);
 		notifyUI(cmd, response);
@@ -72,7 +73,7 @@ public class MessageFacade extends Observable {
 	 * @param response
 	 */
 	private void insert2DB(Command cmd, String cacheUrl, String response) {
-		Log.e("Test", "MessageFacade insert2DB");
+		Log.e(TAG, "MessageFacade insert2DB");
 		Uri uri = Urls.CONTENT_URI;
 
 		ContentValues values = new ContentValues();
@@ -99,17 +100,31 @@ public class MessageFacade extends Observable {
 	 * @param response
 	 */
 	private void notifyUI(Command cmd, String response) {
+		Log.e(TAG, "MessageFacade notifyUI cmd="+cmd.toString());
+		ObserverData data = new ObserverData();
+		data.cmd = cmd;
+
 		if (cmd == Command.owner_users_show) {
 			try {
 				JSONObject owneruser = new JSONObject(response);
 				String url = owneruser.getString("avatar_large");
+				data.data = url;
 				setChanged();
 				notifyObservers(url);
-				Log.e("Test", "MessageFacade notifyUI");
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+		} else if (cmd == Command.friends_timeline) {
+			boolean update = !TextUtils.isEmpty(response);
+			data.data = update;
+			setChanged();
+			notifyObservers(data);
 		}
+	}
+
+	public static class ObserverData {
+		public Command cmd;
+		public Object data;
 	}
 
 	/************************************ ª∫¥Êœ‡πÿ ***********************************/
@@ -122,7 +137,7 @@ public class MessageFacade extends Observable {
 	 * @param response
 	 */
 	private void insert2Cache(Command cmd, String cacheUrl, String response) {
-		Log.e("Test", "MessageFacade insert2Cache");
+		Log.e(TAG, "MessageFacade insert2Cache");
 		// ª∫¥Êurl«Î«Û
 		mWeiboCache.getReuestUrls().put(cacheUrl, response);
 
@@ -141,7 +156,7 @@ public class MessageFacade extends Observable {
 	 * @return response
 	 */
 	public String getResponseFromCache(Command cmd) {
-		Log.e("Test", "MessageFacade getResponseFromCache");
+		Log.e(TAG, "MessageFacade getResponseFromCache");
 		ConcurrentHashMap<String, String> requestUrls = mWeiboCache.getReuestUrls();
 		if (requestUrls == null) {
 			mWeiboCache.initWeiboCache();

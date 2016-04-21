@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingLeft="10dp"
+    android:paddingRight="10dp"
     android:paddingBottom="10dp"
     android:paddingTop="10dp" >
 
@@ -66,10 +67,19 @@
     
     <ImageView
         android:id="@+id/friend_status_image"
-        android:layout_width="150dp"
-        android:layout_height="150dp"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
         android:layout_marginTop="10dp"
         android:layout_below="@id/friend_status_content"
-        android:src="@drawable/friend_status_image_small" />
+        android:src="@drawable/friend_status_image_small"
+        android:visibility="gone" />
+    
+    <SurfaceView
+        android:id="@+id/friend_status_video"
+        android:layout_width="fill_parent"
+        android:layout_height="200dp"
+        android:layout_marginTop="10dp"
+        android:layout_below="@id/friend_status_content"
+        android:visibility="gone" />
 
 </RelativeLayout>

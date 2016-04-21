@@ -1,22 +1,31 @@
 package com.lzp.weibo.activity;
 
+import java.util.Observable;
+import java.util.Observer;
+
 import com.lzp.weibo.R;
 import com.lzp.weibo.adapter.FriendsTimelineAdapter;
 import com.lzp.weibo.app.AccessTokenKeeper;
 import com.lzp.weibo.app.AppInterface;
 import com.lzp.weibo.app.BaseApplication;
 import com.lzp.weibo.msg.Command;
+import com.lzp.weibo.msg.MessageFacade.ObserverData;
 import com.sina.weibo.sdk.auth.Oauth2AccessToken;
 import com.sina.weibo.sdk.openapi.models.StatusList;
 
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Handler.Callback;
+import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v4.widget.SwipeRefreshLayout.OnRefreshListener;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
+import android.widget.AbsListView.OnScrollListener;
 import android.widget.ListView;
 
 /**
@@ -25,7 +34,7 @@ import android.widget.ListView;
  * @author SKJP
  *
  */
-public class FirstPageFragment extends Fragment implements OnRefreshListener {
+public class FirstPageFragment extends Fragment implements OnRefreshListener, OnScrollListener, Callback {
 
 	public static final String TAG = FirstPageFragment.class.getSimpleName();
 
@@ -33,12 +42,25 @@ public class FirstPageFragment extends Fragment implements OnRefreshListener {
 	private SwipeRefreshLayout mSwipeRefreshWidget;
 	private ListView mList;
 	private FriendsTimelineAdapter mAdapter;
-	private Handler mHandler = new Handler();
-	private final Runnable mRefreshDone = new Runnable() {
+	private boolean mIsloading = false;
+	private View mLoadView;
+
+	private static final int UPDATE_STATUSLIST = 1;
+	private static final int REFRESH_DONE = 2;
+	private Handler mHandler = new Handler(this);
+
+	private Observer mStatusListObserver = new Observer() {
 
 		@Override
-		public void run() {
-			mSwipeRefreshWidget.setRefreshing(false);
+		public void update(Observable observable, Object data) {
+			if (data != null && data instanceof ObserverData) {
+				ObserverData obData = (ObserverData) data;
+				if (obData.cmd == Command.friends_timeline) {
+					Message msg = mHandler.obtainMessage(UPDATE_STATUSLIST);
+					msg.obj = obData.data;
+					mHandler.sendMessage(msg);
+				}
+			}
 		}
 	};
 
@@ -69,14 +91,16 @@ public class FirstPageFragment extends Fragment implements OnRefreshListener {
 		mSwipeRefreshWidget.setOnRefreshListener(this);
 		mAdapter = new FriendsTimelineAdapter(getActivity());
 		mList.setAdapter(mAdapter);
-		initData();
-//		Oauth2AccessToken token = AccessTokenKeeper.readAccessToken(getActivity());
-//		mApp.getMessageFacade().sendRequest(Command.friends_timeline,
-//				"https://api.weibo.com/2/statuses/friends_timeline.json?access_token=" + token.getToken());
+		mList.setOnScrollListener(this);
+
+		mApp.getMessageFacade().addObserver(mStatusListObserver);
+
+		refreshListView();
 	}
 
-	private void initData() {
+	private void refreshListView() {
 		StatusList statusList = mApp.getMessageFacade().getStatusListFromCache();
+		Log.e(TAG, "FirstPageFragment refreshListView statuslist size=" + statusList.statusList.size());
 		mAdapter.setData(statusList);
 	}
 
@@ -86,8 +110,55 @@ public class FirstPageFragment extends Fragment implements OnRefreshListener {
 	}
 
 	private void refresh() {
-		mHandler.removeCallbacks(mRefreshDone);
-		mHandler.postDelayed(mRefreshDone, 1000);
+		// «Î«Û∫√”—Œ¢≤©
+		Oauth2AccessToken token = AccessTokenKeeper.readAccessToken(getActivity());
+		mApp.getMessageFacade().sendRequest(Command.friends_timeline,
+				"https://api.weibo.com/2/statuses/friends_timeline.json?access_token=" + token.getToken());
 	}
 
+	@Override
+	public void onScrollStateChanged(AbsListView view, int scrollState) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+//		if (firstVisibleItem + visibleItemCount == totalItemCount && !mIsloading) {
+//			mLoadView = LayoutInflater.from(getActivity()).inflate(R.layout.list_item_loading, null);
+//			mList.removeFooterView(mLoadView);
+//			mList.addFooterView(mLoadView);
+//			mIsloading = true;
+//		}
+	}
+
+	@Override
+	public void onDestroyView() {
+		super.onDestroyView();
+		mApp.getMessageFacade().deleteObserver(mStatusListObserver);
+	}
+
+	@Override
+	public boolean handleMessage(Message msg) {
+		Object data = msg.obj;
+
+		switch (msg.what) {
+		case UPDATE_STATUSLIST:
+			Log.e(TAG, "FirstPageFragment UPDATE_STATUSLIST");
+			mHandler.removeMessages(REFRESH_DONE);
+			mHandler.sendEmptyMessage(REFRESH_DONE);
+			boolean update = (boolean) data;
+			if (update) {
+				refreshListView();
+			}
+			break;
+		case REFRESH_DONE:
+			Log.e(TAG, "FirstPageFragment REFRESH_DONE");
+			mSwipeRefreshWidget.setRefreshing(false);
+			break;
+		default:
+			break;
+		}
+		return true;
+	}
 }

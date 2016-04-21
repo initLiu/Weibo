@@ -11,6 +11,7 @@ import com.lzp.weibo.app.AccessTokenKeeper;
 import com.lzp.weibo.app.AppInterface;
 import com.lzp.weibo.app.BaseApplication;
 import com.lzp.weibo.msg.Command;
+import com.lzp.weibo.msg.MessageFacade.ObserverData;
 import com.sina.weibo.sdk.auth.Oauth2AccessToken;
 
 import android.os.Bundle;
@@ -145,12 +146,13 @@ public class DrawerFragment extends Fragment implements OnClickListener, Callbac
 
 		@Override
 		public void update(Observable observable, Object data) {
-			Log.e("Test", "DrawerFragment update");
-			if (data != null) {
-				Log.e("Test", "DrawerFragment update1");
-				Message msg = mUiHandler.obtainMessage(UPDATE_FACE);
-				msg.obj = data;
-				mUiHandler.sendMessage(msg);
+			if (data != null && data instanceof ObserverData) {
+				ObserverData obData = (ObserverData) data;
+				if (obData.cmd == Command.owner_users_show) {
+					Message msg = mUiHandler.obtainMessage(UPDATE_FACE);
+					msg.obj = obData.data;
+					mUiHandler.sendMessage(msg);
+				}
 			}
 		}
 	}
