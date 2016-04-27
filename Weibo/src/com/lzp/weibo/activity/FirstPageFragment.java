@@ -27,6 +27,7 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.ListView;
+import android.widget.Toast;
 
 /**
  * 首页
@@ -44,6 +45,7 @@ public class FirstPageFragment extends Fragment implements OnRefreshListener, On
 	private FriendsTimelineAdapter mAdapter;
 	private boolean mIsloading = false;
 	private View mLoadView;
+	private StatusList mStatusList;
 
 	private static final int UPDATE_STATUSLIST = 1;
 	private static final int REFRESH_DONE = 2;
@@ -99,9 +101,9 @@ public class FirstPageFragment extends Fragment implements OnRefreshListener, On
 	}
 
 	private void refreshListView() {
-		StatusList statusList = mApp.getMessageFacade().getStatusListFromCache();
-		Log.e(TAG, "FirstPageFragment refreshListView statuslist size=" + statusList.statusList.size());
-		mAdapter.setData(statusList);
+		Log.e("Test", "FirstPageFragment refreshListView");
+		mStatusList = mApp.getMessageFacade().getStatusListFromCache();
+		mAdapter.setData(mStatusList);
 	}
 
 	@Override
@@ -110,10 +112,18 @@ public class FirstPageFragment extends Fragment implements OnRefreshListener, On
 	}
 
 	private void refresh() {
+		long since_id = 0;
+		if (mStatusList == null) {
+			mStatusList = mApp.getMessageFacade().getStatusListFromCache();
+		}
+		if (mStatusList != null && mStatusList.statusList != null && !mStatusList.statusList.isEmpty()) {
+			since_id = Long.parseLong(mStatusList.statusList.get(0).id);
+		}
 		// 请求好友微博
 		Oauth2AccessToken token = AccessTokenKeeper.readAccessToken(getActivity());
 		mApp.getMessageFacade().sendRequest(Command.friends_timeline,
-				"https://api.weibo.com/2/statuses/friends_timeline.json?access_token=" + token.getToken());
+				"https://api.weibo.com/2/statuses/friends_timeline.json?access_token=" + token.getToken() + "&since_id="
+						+ since_id);
 	}
 
 	@Override
@@ -124,12 +134,15 @@ public class FirstPageFragment extends Fragment implements OnRefreshListener, On
 
 	@Override
 	public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-//		if (firstVisibleItem + visibleItemCount == totalItemCount && !mIsloading) {
-//			mLoadView = LayoutInflater.from(getActivity()).inflate(R.layout.list_item_loading, null);
-//			mList.removeFooterView(mLoadView);
-//			mList.addFooterView(mLoadView);
-//			mIsloading = true;
-//		}
+		// if (firstVisibleItem + visibleItemCount == totalItemCount &&
+		// !mIsloading) {
+		// mLoadView =
+		// LayoutInflater.from(getActivity()).inflate(R.layout.list_item_loading,
+		// null);
+		// mList.removeFooterView(mLoadView);
+		// mList.addFooterView(mLoadView);
+		// mIsloading = true;
+		// }
 	}
 
 	@Override
@@ -150,6 +163,8 @@ public class FirstPageFragment extends Fragment implements OnRefreshListener, On
 			boolean update = (boolean) data;
 			if (update) {
 				refreshListView();
+			} else {
+				Toast.makeText(getActivity(), "本次没有更新", Toast.LENGTH_SHORT).show();
 			}
 			break;
 		case REFRESH_DONE:

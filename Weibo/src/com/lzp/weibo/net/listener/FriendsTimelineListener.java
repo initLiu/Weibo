@@ -8,6 +8,7 @@ import com.lzp.weibo.net.NetCore;
 import android.util.Log;
 
 public class FriendsTimelineListener extends BaseResponseListener {
+	public static final String TAG = FriendsTimelineListener.class.getSimpleName();
 
 	public FriendsTimelineListener(NetCore netCore) {
 		super(netCore);

@@ -61,8 +61,13 @@ public class MessageFacade extends Observable {
 	 */
 	public void receiveResponse(Command cmd, String cacheUrl, String response) {
 		Log.e(TAG, "MessageFacade receiveResponse");
+		StatusList statusListt = StatusList.parse(response);
+		if (statusListt == null || statusListt.statusList == null || statusListt.statusList.isEmpty()) {
+			notifyUI(cmd, null);
+			return;
+		}
 		insert2DB(cmd, cacheUrl, response);
-		insert2Cache(cmd, cacheUrl, response);
+		insert2Cache(cmd, cacheUrl, response, statusListt);
 		notifyUI(cmd, response);
 	}
 
@@ -100,7 +105,7 @@ public class MessageFacade extends Observable {
 	 * @param response
 	 */
 	private void notifyUI(Command cmd, String response) {
-		Log.e(TAG, "MessageFacade notifyUI cmd="+cmd.toString());
+		Log.e(TAG, "MessageFacade notifyUI cmd=" + cmd.toString());
 		ObserverData data = new ObserverData();
 		data.cmd = cmd;
 
@@ -136,7 +141,7 @@ public class MessageFacade extends Observable {
 	 * @param cacheUrl
 	 * @param response
 	 */
-	private void insert2Cache(Command cmd, String cacheUrl, String response) {
+	private void insert2Cache(Command cmd, String cacheUrl, String response, StatusList statusList) {
 		Log.e(TAG, "MessageFacade insert2Cache");
 		// 缓存url请求
 		mWeiboCache.getReuestUrls().put(cacheUrl, response);
@@ -145,7 +150,7 @@ public class MessageFacade extends Observable {
 		if (cmd == Command.owner_users_show) {// 账号信息
 
 		} else if (cmd == Command.friends_timeline) {// 微博列表
-			mWeiboCache.setStatusList(StatusList.parse(response));
+			mWeiboCache.setStatusList(statusList);
 		}
 	}
 
@@ -158,9 +163,6 @@ public class MessageFacade extends Observable {
 	public String getResponseFromCache(Command cmd) {
 		Log.e(TAG, "MessageFacade getResponseFromCache");
 		ConcurrentHashMap<String, String> requestUrls = mWeiboCache.getReuestUrls();
-		if (requestUrls == null) {
-			mWeiboCache.initWeiboCache();
-		}
 
 		String url = null;
 		if (cmd == Command.owner_users_show) {
@@ -177,9 +179,7 @@ public class MessageFacade extends Observable {
 	}
 
 	public StatusList getStatusListFromCache() {
-		if (mWeiboCache.getReuestUrls() == null) {
-			mWeiboCache.initWeiboCache();
-		}
+		Log.e("Test", "MessageFacade getStatusListFromCache");
 		return mWeiboCache.getStatusList();
 	}
 }
