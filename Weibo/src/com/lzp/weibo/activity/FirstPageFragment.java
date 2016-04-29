@@ -9,6 +9,7 @@ import com.lzp.weibo.app.AccessTokenKeeper;
 import com.lzp.weibo.app.AppInterface;
 import com.lzp.weibo.app.BaseApplication;
 import com.lzp.weibo.msg.Command;
+import com.lzp.weibo.msg.MessageFacade;
 import com.lzp.weibo.msg.MessageFacade.ObserverData;
 import com.sina.weibo.sdk.auth.Oauth2AccessToken;
 import com.sina.weibo.sdk.openapi.models.StatusList;
@@ -20,6 +21,7 @@ import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v4.widget.SwipeRefreshLayout.OnRefreshListener;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -45,10 +47,11 @@ public class FirstPageFragment extends Fragment implements OnRefreshListener, On
 	private FriendsTimelineAdapter mAdapter;
 	private boolean mIsloading = false;
 	private View mLoadView;
-	private StatusList mStatusList;
 
 	private static final int UPDATE_STATUSLIST = 1;
 	private static final int REFRESH_DONE = 2;
+	private static final int ADD_HISTORY = 3;
+	private static final int ERROR = 4;
 	private Handler mHandler = new Handler(this);
 
 	private Observer mStatusListObserver = new Observer() {
@@ -59,6 +62,14 @@ public class FirstPageFragment extends Fragment implements OnRefreshListener, On
 				ObserverData obData = (ObserverData) data;
 				if (obData.cmd == Command.friends_timeline) {
 					Message msg = mHandler.obtainMessage(UPDATE_STATUSLIST);
+					msg.obj = obData.data;
+					mHandler.sendMessage(msg);
+				}else if(obData.cmd==Command.friends_timeline_old){
+					Message msg = mHandler.obtainMessage(ADD_HISTORY);
+					msg.obj = obData.data;
+					mHandler.sendMessage(msg);
+				}else if(obData.cmd==Command.error){
+					Message msg = mHandler.obtainMessage(ERROR);
 					msg.obj = obData.data;
 					mHandler.sendMessage(msg);
 				}
@@ -102,8 +113,8 @@ public class FirstPageFragment extends Fragment implements OnRefreshListener, On
 
 	private void refreshListView() {
 		Log.e("Test", "FirstPageFragment refreshListView");
-		mStatusList = mApp.getMessageFacade().getStatusListFromCache();
-		mAdapter.setData(mStatusList);
+		StatusList statusList = mApp.getMessageFacade().getStatusListFromCache();
+		mAdapter.setData(statusList);
 	}
 
 	@Override
@@ -112,16 +123,14 @@ public class FirstPageFragment extends Fragment implements OnRefreshListener, On
 	}
 
 	private void refresh() {
-		long since_id = 0;
-		if (mStatusList == null) {
-			mStatusList = mApp.getMessageFacade().getStatusListFromCache();
-		}
-		if (mStatusList != null && mStatusList.statusList != null && !mStatusList.statusList.isEmpty()) {
-			since_id = Long.parseLong(mStatusList.statusList.get(0).id);
+		MessageFacade messageFacade = mApp.getMessageFacade();
+		String since_id = messageFacade.getSinceId();
+		if (TextUtils.isEmpty(since_id)) {
+			since_id = "0";
 		}
 		// 请求好友微博
 		Oauth2AccessToken token = AccessTokenKeeper.readAccessToken(getActivity());
-		mApp.getMessageFacade().sendRequest(Command.friends_timeline,
+		messageFacade.sendRequest(Command.friends_timeline,
 				"https://api.weibo.com/2/statuses/friends_timeline.json?access_token=" + token.getToken() + "&since_id="
 						+ since_id);
 	}
@@ -134,17 +143,32 @@ public class FirstPageFragment extends Fragment implements OnRefreshListener, On
 
 	@Override
 	public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-		// if (firstVisibleItem + visibleItemCount == totalItemCount &&
-		// !mIsloading) {
-		// mLoadView =
-		// LayoutInflater.from(getActivity()).inflate(R.layout.list_item_loading,
-		// null);
-		// mList.removeFooterView(mLoadView);
-		// mList.addFooterView(mLoadView);
-		// mIsloading = true;
-		// }
+//		Log.e("Test", "FirstPageFragment onScroll firstVisibleItem=" + firstVisibleItem + ",visibleItemCount="
+//				+ visibleItemCount + ",totalItemCount=" + totalItemCount + "mIsloading=" + mIsloading);
+		if (firstVisibleItem + visibleItemCount == totalItemCount && totalItemCount != 0 && !mIsloading) {
+			Log.e("Test", "FirstPageFragment onScroll addFooter");
+			mLoadView = LayoutInflater.from(getActivity()).inflate(R.layout.list_item_loading, null);
+			mList.removeFooterView(mLoadView);
+			mList.addFooterView(mLoadView);
+			mIsloading = true;
+			addHistory();
+		}
 	}
 
+	private void addHistory(){
+		Log.e("Test", "FirstPageFragment addHistory");
+		MessageFacade messageFacade = mApp.getMessageFacade();
+		String max_id = messageFacade.getMaxId();
+		if (TextUtils.isEmpty(max_id)) {
+			max_id = "0";
+		}
+		// 请求好友微博
+		Oauth2AccessToken token = AccessTokenKeeper.readAccessToken(getActivity());
+		messageFacade.sendRequest(Command.friends_timeline_old,
+				"https://api.weibo.com/2/statuses/friends_timeline.json?access_token=" + token.getToken() + "&max_id="
+						+ max_id);
+	}
+	
 	@Override
 	public void onDestroyView() {
 		super.onDestroyView();
@@ -154,13 +178,24 @@ public class FirstPageFragment extends Fragment implements OnRefreshListener, On
 	@Override
 	public boolean handleMessage(Message msg) {
 		Object data = msg.obj;
-
+		boolean update;
+		
 		switch (msg.what) {
 		case UPDATE_STATUSLIST:
 			Log.e(TAG, "FirstPageFragment UPDATE_STATUSLIST");
 			mHandler.removeMessages(REFRESH_DONE);
 			mHandler.sendEmptyMessage(REFRESH_DONE);
-			boolean update = (boolean) data;
+			update = (boolean) data;
+			if (update) {
+				refreshListView();
+			} else {
+				Toast.makeText(getActivity(), "本次没有更新", Toast.LENGTH_SHORT).show();
+			}
+			break;
+		case ADD_HISTORY:
+			mList.removeFooterView(mLoadView);
+			mIsloading = false;
+			update = (boolean) data;
 			if (update) {
 				refreshListView();
 			} else {
@@ -170,6 +205,12 @@ public class FirstPageFragment extends Fragment implements OnRefreshListener, On
 		case REFRESH_DONE:
 			Log.e(TAG, "FirstPageFragment REFRESH_DONE");
 			mSwipeRefreshWidget.setRefreshing(false);
+			break;
+		case ERROR:
+			mHandler.removeMessages(REFRESH_DONE);
+			mHandler.sendEmptyMessage(REFRESH_DONE);
+			mList.removeFooterView(mLoadView);
+			Toast.makeText(getActivity(), "请求失败:"+data.toString(), Toast.LENGTH_SHORT).show();
 			break;
 		default:
 			break;

@@ -25,6 +25,9 @@ public class ResponListenerCreator {
 		} else if (cmd == Command.friends_timeline) {
 			listeners.put(cmd.ordinal(), new FriendsTimelineListener(netCore));
 			return listeners.get(cmd.ordinal());
+		}else if(cmd==Command.friends_timeline_old){
+			listeners.put(cmd.ordinal(), new FriendsTimelineListenerOld(netCore));
+			return listeners.get(cmd.ordinal());
 		}
 		return null;
 	}

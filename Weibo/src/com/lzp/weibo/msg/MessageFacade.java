@@ -9,9 +9,11 @@ import com.lzp.weibo.app.AppInterface;
 import com.lzp.weibo.cache.WeiboCache;
 import com.lzp.weibo.data.DataItem;
 import com.lzp.weibo.data.WeiboDatabase.Urls;
+import com.lzp.weibo.msg.handler.BusinessHandler;
 import com.lzp.weibo.msg.handler.FriendsTimelineHandler;
 import com.lzp.weibo.msg.handler.OwnerUserShowHandler;
 import com.sina.weibo.sdk.openapi.models.StatusList;
+import com.sina.weibo.sdk.openapi.models.User;
 
 import android.content.ContentValues;
 import android.net.Uri;
@@ -40,16 +42,15 @@ public class MessageFacade extends Observable {
 		if (TextUtils.isEmpty(url)) {
 			return false;
 		}
+		BusinessHandler handler = null;
 		if (cmd == Command.owner_users_show) {
-			OwnerUserShowHandler handler = (OwnerUserShowHandler) mApp
-					.getBusinessHandler(AppInterface.USERSHOW_HANDLER);
-			return handler.sendRequest(cmd, url);
+			handler = mApp.getBusinessHandler(AppInterface.USERSHOW_HANDLER);
 		} else if (cmd == Command.friends_timeline) {
-			FriendsTimelineHandler handler = (FriendsTimelineHandler) mApp
-					.getBusinessHandler(AppInterface.FRIENDSTIMELINE_HANDLER);
-			return handler.sendRequest(cmd, url);
+			handler = mApp.getBusinessHandler(AppInterface.FRIENDSTIMELINE_HANDLER);
+		} else if (cmd == Command.friends_timeline_old) {
+			handler = mApp.getBusinessHandler(AppInterface.FRIENDSTIMELINE_HANDLER_OLD);
 		}
-		return false;
+		return handler.sendRequest(cmd, url);
 	}
 
 	/**
@@ -61,16 +62,32 @@ public class MessageFacade extends Observable {
 	 */
 	public void receiveResponse(Command cmd, String cacheUrl, String response) {
 		Log.e(TAG, "MessageFacade receiveResponse");
-		StatusList statusListt = StatusList.parse(response);
-		if (statusListt == null || statusListt.statusList == null || statusListt.statusList.isEmpty()) {
+		if (TextUtils.isEmpty(response)) {
 			notifyUI(cmd, null);
 			return;
 		}
+
+		Object data = null;
+		if (cmd == Command.owner_users_show) {
+			data = User.parse(response);
+		} else if ((cmd == Command.friends_timeline) || (cmd == Command.friends_timeline_old)) {
+			StatusList statusList = StatusList.parse(response);
+			if (statusList == null || statusList.statusList == null || statusList.statusList.isEmpty()) {
+				notifyUI(cmd, null);
+				return;
+			}
+			data = statusList;
+		}
+
 		insert2DB(cmd, cacheUrl, response);
-		insert2Cache(cmd, cacheUrl, response, statusListt);
-		notifyUI(cmd, response);
+		insert2Cache(cmd, cacheUrl, response, data);
+		notifyUI(cmd, data);
 	}
 
+	public void receiveErrorResponse(String msg){
+		notifyUI(Command.error, msg);
+	}
+	
 	/**
 	 * 将url请求保存到数据库中
 	 * 
@@ -79,6 +96,9 @@ public class MessageFacade extends Observable {
 	 */
 	private void insert2DB(Command cmd, String cacheUrl, String response) {
 		Log.e(TAG, "MessageFacade insert2DB");
+		if (cmd == Command.friends_timeline_old) {
+			return;
+		}
 		Uri uri = Urls.CONTENT_URI;
 
 		ContentValues values = new ContentValues();
@@ -104,25 +124,26 @@ public class MessageFacade extends Observable {
 	 * @param cmd
 	 * @param response
 	 */
-	private void notifyUI(Command cmd, String response) {
+	private void notifyUI(Command cmd, Object response) {
 		Log.e(TAG, "MessageFacade notifyUI cmd=" + cmd.toString());
 		ObserverData data = new ObserverData();
 		data.cmd = cmd;
 
 		if (cmd == Command.owner_users_show) {
-			try {
-				JSONObject owneruser = new JSONObject(response);
-				String url = owneruser.getString("avatar_large");
-				data.data = url;
+			if (response != null) {
+				User user = (User) response;
+				data.data = user.avatar_large;
 				setChanged();
-				notifyObservers(url);
-			} catch (Exception e) {
-				e.printStackTrace();
+				notifyObservers(data);
 			}
-		} else if (cmd == Command.friends_timeline) {
-			boolean update = !TextUtils.isEmpty(response);
+		} else if ((cmd == Command.friends_timeline)||(cmd == Command.friends_timeline_old)) {
+			boolean update = response != null;
 			data.data = update;
 			setChanged();
+			notifyObservers(data);
+		} else if (cmd == Command.error) {
+			setChanged();
+			data.data = response;
 			notifyObservers(data);
 		}
 	}
@@ -141,16 +162,20 @@ public class MessageFacade extends Observable {
 	 * @param cacheUrl
 	 * @param response
 	 */
-	private void insert2Cache(Command cmd, String cacheUrl, String response, StatusList statusList) {
+	private void insert2Cache(Command cmd, String cacheUrl, String response, Object data) {
 		Log.e(TAG, "MessageFacade insert2Cache");
-		// 缓存url请求
-		mWeiboCache.getReuestUrls().put(cacheUrl, response);
 
 		// 缓存url请求返回的数据
 		if (cmd == Command.owner_users_show) {// 账号信息
-
+			// 缓存url请求
+			mWeiboCache.getReuestUrls().put(cacheUrl, response);
 		} else if (cmd == Command.friends_timeline) {// 微博列表
-			mWeiboCache.setStatusList(statusList);
+			// 缓存url请求
+			mWeiboCache.getReuestUrls().put(cacheUrl, response);
+			
+			mWeiboCache.setStatusList((StatusList) data, true);
+		} else if (cmd == Command.friends_timeline_old) {
+			mWeiboCache.setStatusList((StatusList) data, false);
 		}
 	}
 
@@ -181,5 +206,13 @@ public class MessageFacade extends Observable {
 	public StatusList getStatusListFromCache() {
 		Log.e("Test", "MessageFacade getStatusListFromCache");
 		return mWeiboCache.getStatusList();
+	}
+
+	public String getSinceId() {
+		return mWeiboCache.getSinceId();
+	}
+
+	public String getMaxId() {
+		return mWeiboCache.getMaxId();
 	}
 }

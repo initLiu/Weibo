@@ -35,6 +35,7 @@ public class DrawerFragment extends Fragment implements OnClickListener, Callbac
 		fistePage
 	};
 
+	public static final String TAG = DrawerFragment.class.getSimpleName();
 	private static final int UPDATE_FACE = 1;
 
 	private DrawerPage mCurPage = DrawerPage.fistePage;
@@ -146,6 +147,7 @@ public class DrawerFragment extends Fragment implements OnClickListener, Callbac
 
 		@Override
 		public void update(Observable observable, Object data) {
+			Log.e(TAG, "FaceUpdateObserver update");
 			if (data != null && data instanceof ObserverData) {
 				ObserverData obData = (ObserverData) data;
 				if (obData.cmd == Command.owner_users_show) {
@@ -183,7 +185,7 @@ public class DrawerFragment extends Fragment implements OnClickListener, Callbac
 	}
 
 	private void updateFace(String url) {
-		Log.e("Test", "DrawerFragment updateFace");
+		Log.e("Test", "DrawerFragment updateFace url=" + url);
 		Glide.with(getActivity()).load(url).asBitmap().placeholder(R.drawable.ic_weibo).into(mImageFace);
 	}
 }

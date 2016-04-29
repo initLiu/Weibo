@@ -1,6 +1,7 @@
 package com.lzp.weibo.msg.handler;
 
 import com.lzp.weibo.app.AppInterface;
+import com.lzp.weibo.msg.Command;
 import com.lzp.weibo.msg.ToAppMsg;
 import com.lzp.weibo.msg.ToServiceMsg;
 
@@ -14,8 +15,15 @@ public abstract class BusinessHandler {
 		mApp = app;
 	}
 
-	public abstract void onReceive(ToAppMsg msg);
+	public void onReceive(ToAppMsg msg){
+		Log.e("Test", "BusinessHandler onReceive");
+		mApp.getMessageFacade().receiveResponse(msg.getCmd(), msg.getUrl(), msg.getResponse());
+	}
 
+	public boolean sendRequest(Command cmd, String url){
+		return false;
+	}
+	
 	public boolean sendRequest(ToServiceMsg msg){
 		Log.e("Test", "BusinessHandler sendRequest");
 		if (msg == null) {

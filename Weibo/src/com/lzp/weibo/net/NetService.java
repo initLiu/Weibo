@@ -61,7 +61,15 @@ public class NetService extends Service {
 		@Override
 		public void unRegister() throws RemoteException {
 			mCallback = null;
+			mResponseHandler.interrupt();
 		}
 	};
+
+	@Override
+	public boolean onUnbind(Intent intent) {
+		mCallback = null;
+		mResponseHandler.interrupt();
+		return super.onUnbind(intent);
+	}
 
 }

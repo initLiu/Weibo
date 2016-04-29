@@ -26,4 +26,10 @@ public class MessageHandler extends BusinessHandler {
 		return false;
 	}
 
+	@Override
+	public boolean sendRequest(Command cmd, String url) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 }
