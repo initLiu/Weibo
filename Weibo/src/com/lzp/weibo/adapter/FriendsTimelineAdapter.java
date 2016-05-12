@@ -7,6 +7,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.lzp.weibo.R;
 import com.lzp.weibo.text.WeiboText;
+import com.lzp.weibo.widget.MultiImageView;
 import com.sina.weibo.sdk.openapi.models.Status;
 import com.sina.weibo.sdk.openapi.models.StatusList;
 
@@ -16,6 +17,7 @@ import android.text.Html;
 import android.text.TextUtils;
 import android.text.format.Time;
 import android.text.method.LinkMovementMethod;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -93,6 +95,7 @@ public class FriendsTimelineAdapter extends BaseAdapter {
 			holder.textSource = (TextView) convertView.findViewById(R.id.friend_status_source);
 			holder.textContent = (TextView) convertView.findViewById(R.id.friend_status_content);
 			holder.imageImage = (ImageView) convertView.findViewById(R.id.friend_status_image);
+			holder.multiPicUrls = (MultiImageView)convertView.findViewById(R.id.friend_pic_urls);
 			convertView.setTag(holder);
 		} else {
 			holder = (ViewHolder) convertView.getTag();
@@ -115,19 +118,31 @@ public class FriendsTimelineAdapter extends BaseAdapter {
 		holder.textContent.setMovementMethod(LinkMovementMethod.getInstance());
 		holder.textContent.setLinkTextColor(Color.parseColor("#1C86EE"));
 		holder.textContent.setText(new WeiboText(status.text, WeiboText.GRAB_LINKS));
-		if (!TextUtils.isEmpty(status.bmiddle_pic)) {
-			holder.imageImage.setVisibility(View.VISIBLE);
-			if (status.bmiddle_pic.endsWith(".gif")) {
-				Glide.with(mContext).load(status.bmiddle_pic).diskCacheStrategy(DiskCacheStrategy.SOURCE)
-						.placeholder(R.drawable.image_default).into(holder.imageImage);
-			} else {
-				Glide.with(mContext).load(status.bmiddle_pic).placeholder(R.drawable.image_default)
-						.into(holder.imageImage);
-			}
-		} else {
-			holder.imageImage.setVisibility(View.GONE);
-		}
 
+		if (status.pic_urls != null && !status.pic_urls.isEmpty()) {
+			Log.e(TAG, "position="+holder.multiPicUrls.getTag());
+			if (holder.multiPicUrls.getTag() != null) {
+				holder.multiPicUrls.removeAllPictures();
+			}
+			holder.multiPicUrls.setTag(position);
+			Log.e(TAG, "position1="+position);
+			holder.multiPicUrls.setPicUrls(status.pic_urls);
+			holder.multiPicUrls.setVisibility(View.VISIBLE);
+		} else {
+			holder.multiPicUrls.setVisibility(View.GONE);
+			if (!TextUtils.isEmpty(status.bmiddle_pic)) {
+				holder.imageImage.setVisibility(View.VISIBLE);
+				if (status.bmiddle_pic.endsWith(".gif")) {
+					Glide.with(mContext).load(status.bmiddle_pic).diskCacheStrategy(DiskCacheStrategy.SOURCE)
+							.placeholder(R.drawable.image_default).into(holder.imageImage);
+				} else {
+					Glide.with(mContext).load(status.bmiddle_pic).placeholder(R.drawable.image_default)
+							.into(holder.imageImage);
+				}
+			} else {
+				holder.imageImage.setVisibility(View.GONE);
+			}
+		}
 	}
 
 	private String formatTime(String createdtime) {
@@ -176,5 +191,6 @@ public class FriendsTimelineAdapter extends BaseAdapter {
 		TextView textSource;
 		TextView textContent;
 		ImageView imageImage;
+		MultiImageView multiPicUrls;
 	}
 }
