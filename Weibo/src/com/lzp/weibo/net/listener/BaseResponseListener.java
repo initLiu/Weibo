@@ -26,7 +26,12 @@ public abstract class BaseResponseListener implements Listener<String>, ErrorLis
 	public void onErrorResponse(VolleyError arg0) {
 		ToAppMsg msg = new ToAppMsg();
 		msg.setCmd(Command.error);
-		msg.setResponse(arg0.networkResponse.statusCode + "");
+		try {
+			msg.setResponse(arg0.networkResponse.statusCode + "");
+		} catch (Exception e) {
+			msg.setResponse(arg0.getMessage());
+		}
+		
 		netCore.addResponseToQueue(msg);
 	}
 

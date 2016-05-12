@@ -46,12 +46,15 @@ public class FirstPageFragment extends Fragment implements OnRefreshListener, On
 	private ListView mList;
 	private FriendsTimelineAdapter mAdapter;
 	private boolean mIsloading = false;
+	private boolean mShowLoading = false;
 	private View mLoadView;
 
 	private static final int UPDATE_STATUSLIST = 1;
 	private static final int REFRESH_DONE = 2;
 	private static final int ADD_HISTORY = 3;
 	private static final int ERROR = 4;
+	
+	private static final int DELAY_TIME = 2000;
 	private Handler mHandler = new Handler(this);
 
 	private Observer mStatusListObserver = new Observer() {
@@ -67,11 +70,11 @@ public class FirstPageFragment extends Fragment implements OnRefreshListener, On
 				}else if(obData.cmd==Command.friends_timeline_old){
 					Message msg = mHandler.obtainMessage(ADD_HISTORY);
 					msg.obj = obData.data;
-					mHandler.sendMessage(msg);
+					mHandler.sendMessageDelayed(msg, DELAY_TIME);
 				}else if(obData.cmd==Command.error){
 					Message msg = mHandler.obtainMessage(ERROR);
 					msg.obj = obData.data;
-					mHandler.sendMessage(msg);
+					mHandler.sendMessageDelayed(msg, DELAY_TIME);
 				}
 			}
 		}
@@ -112,7 +115,7 @@ public class FirstPageFragment extends Fragment implements OnRefreshListener, On
 	}
 
 	private void refreshListView() {
-		Log.e("Test", "FirstPageFragment refreshListView");
+		Log.e(TAG, "FirstPageFragment refreshListView");
 		StatusList statusList = mApp.getMessageFacade().getStatusListFromCache();
 		mAdapter.setData(statusList);
 	}
@@ -137,26 +140,32 @@ public class FirstPageFragment extends Fragment implements OnRefreshListener, On
 
 	@Override
 	public void onScrollStateChanged(AbsListView view, int scrollState) {
-		// TODO Auto-generated method stub
-
+		if (scrollState == 0 && mShowLoading) {
+			getHistory();
+		}
 	}
 
 	@Override
 	public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-//		Log.e("Test", "FirstPageFragment onScroll firstVisibleItem=" + firstVisibleItem + ",visibleItemCount="
-//				+ visibleItemCount + ",totalItemCount=" + totalItemCount + "mIsloading=" + mIsloading);
 		if (firstVisibleItem + visibleItemCount == totalItemCount && totalItemCount != 0 && !mIsloading) {
-			Log.e("Test", "FirstPageFragment onScroll addFooter");
-			mLoadView = LayoutInflater.from(getActivity()).inflate(R.layout.list_item_loading, null);
-			mList.removeFooterView(mLoadView);
-			mList.addFooterView(mLoadView);
-			mIsloading = true;
-			addHistory();
+			mShowLoading = true;
+		} else {
+			mShowLoading = false;
 		}
 	}
 
+	private void getHistory() {
+		Log.e(TAG, "FirstPageFragment getHistory");
+		mLoadView = LayoutInflater.from(getActivity()).inflate(R.layout.list_item_loading, null);
+		mList.removeFooterView(mLoadView);
+		mList.addFooterView(mLoadView);
+		mList.smoothScrollToPosition(mAdapter.getCount()+1);
+		mIsloading = true;
+		addHistory();
+	}
+	
 	private void addHistory(){
-		Log.e("Test", "FirstPageFragment addHistory");
+		Log.e(TAG, "FirstPageFragment addHistory");
 		MessageFacade messageFacade = mApp.getMessageFacade();
 		String max_id = messageFacade.getMaxId();
 		if (TextUtils.isEmpty(max_id)) {
@@ -210,6 +219,7 @@ public class FirstPageFragment extends Fragment implements OnRefreshListener, On
 			mHandler.removeMessages(REFRESH_DONE);
 			mHandler.sendEmptyMessage(REFRESH_DONE);
 			mList.removeFooterView(mLoadView);
+			mIsloading = false;
 			Toast.makeText(getActivity(), "«Î«Û ß∞‹:"+data.toString(), Toast.LENGTH_SHORT).show();
 			break;
 		default:

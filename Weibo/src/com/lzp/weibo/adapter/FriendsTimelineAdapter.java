@@ -12,6 +12,7 @@ import com.sina.weibo.sdk.openapi.models.StatusList;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.text.Html;
 import android.text.TextUtils;
 import android.text.format.Time;
 import android.text.method.LinkMovementMethod;
@@ -108,7 +109,7 @@ public class FriendsTimelineAdapter extends BaseAdapter {
 				.into(holder.imageFace);
 		holder.textName.setText(status.user.screen_name);
 		holder.textTime.setText(formatTime(status.created_at));
-		holder.textSource.setText(status.source);
+		holder.textSource.setText(Html.fromHtml(status.source).toString());
 
 		holder.textContent.setSpannableFactory(WeiboText.SPANNABLE_FACTORY);
 		holder.textContent.setMovementMethod(LinkMovementMethod.getInstance());
