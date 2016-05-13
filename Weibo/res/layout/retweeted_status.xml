@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/retweeted_status_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#6E6E6E"
+    android:orientation="vertical"
+    android:visibility="gone" >
+
+    <TextView
+        android:id="@+id/retweeted_status_content"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="微博:世事无绝对。都说团结就是力量。全世界的鸡蛋联合起来就能打破石头吗？所以，还是要面对现实。"
+        android:textColor="#FFFFFF"
+        android:textSize="50px" />
+
+    <com.lzp.weibo.widget.MultiImageView
+        android:id="@+id/retweeted_status_pic_urls"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
+</LinearLayout>

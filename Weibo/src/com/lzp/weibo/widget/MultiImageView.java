@@ -3,17 +3,20 @@ package com.lzp.weibo.widget;
 import java.util.ArrayList;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.lzp.weibo.R;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 
 public class MultiImageView extends TableLayout {
-
+	public static final String TAG = MultiImageView.class.getSimpleName();
+	
 	private ArrayList<String> pic_urls;
 
 	public MultiImageView(Context context, AttributeSet attrs) {
@@ -51,16 +54,22 @@ public class MultiImageView extends TableLayout {
 					ImageView imageView = new ImageView(getContext());
 					imageView.setScaleType(ScaleType.FIT_XY);
 					imageView.setPadding(0, 0, dp2px(5), 0);
+					imageView.setAdjustViewBounds(true);
+					imageView.setMaxWidth(dp2px(135));
+					imageView.setMaxHeight(dp2px(135));
+					imageView.setMinimumWidth(dp2px(45));
+					imageView.setMinimumHeight(dp2px(45));
 
 					tableRow.addView(imageView);
-					int width,height;
-					if (count == 1) {
-						height = width = 150;
+					String url = pic_urls.get(i * 3 + j);
+					if (url.endsWith(".gif")) {
+						Glide.with(getContext()).load(url).diskCacheStrategy(DiskCacheStrategy.SOURCE)
+								.placeholder(R.drawable.image_default).centerCrop().into(imageView);
 					} else {
-						height = width = 100;
+						Log.e(TAG, "url=" + url);
+						Glide.with(getContext()).load(url).placeholder(R.drawable.image_default).centerCrop()
+								.into(imageView);
 					}
-					Glide.with(getContext()).load(pic_urls.get(i * 3 + j)).placeholder(R.drawable.image_default).override(width, height)
-							.into(imageView);
 				}
 				tableRow.setPadding(0, dp2px(5), 0, 0);
 				addView(tableRow, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));

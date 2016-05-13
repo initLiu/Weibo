@@ -23,6 +23,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 /**
@@ -96,6 +98,9 @@ public class FriendsTimelineAdapter extends BaseAdapter {
 			holder.textContent = (TextView) convertView.findViewById(R.id.friend_status_content);
 			holder.imageImage = (ImageView) convertView.findViewById(R.id.friend_status_image);
 			holder.multiPicUrls = (MultiImageView)convertView.findViewById(R.id.friend_pic_urls);
+			holder.layoutRetweeted = (LinearLayout)convertView.findViewById(R.id.retweeted_status_layout);
+			holder.textRetstatus = (TextView)convertView.findViewById(R.id.retweeted_status_content);
+			holder.multiRetPicUrls = (MultiImageView)convertView.findViewById(R.id.retweeted_status_pic_urls);
 			convertView.setTag(holder);
 		} else {
 			holder = (ViewHolder) convertView.getTag();
@@ -119,13 +124,11 @@ public class FriendsTimelineAdapter extends BaseAdapter {
 		holder.textContent.setLinkTextColor(Color.parseColor("#1C86EE"));
 		holder.textContent.setText(new WeiboText(status.text, WeiboText.GRAB_LINKS));
 
-		if (status.pic_urls != null && !status.pic_urls.isEmpty()) {
-			Log.e(TAG, "position="+holder.multiPicUrls.getTag());
+		if (status.pic_urls != null && !status.pic_urls.isEmpty()) {			
 			if (holder.multiPicUrls.getTag() != null) {
 				holder.multiPicUrls.removeAllPictures();
 			}
 			holder.multiPicUrls.setTag(position);
-			Log.e(TAG, "position1="+position);
 			holder.multiPicUrls.setPicUrls(status.pic_urls);
 			holder.multiPicUrls.setVisibility(View.VISIBLE);
 		} else {
@@ -141,6 +144,28 @@ public class FriendsTimelineAdapter extends BaseAdapter {
 				}
 			} else {
 				holder.imageImage.setVisibility(View.GONE);
+			}
+		}
+
+		if (status.retweeted_status == null) {
+			holder.layoutRetweeted.setVisibility(View.GONE);
+		} else {
+			holder.layoutRetweeted.setVisibility(View.VISIBLE);
+			StringBuilder sb = new StringBuilder();
+			sb.append("@").append(status.retweeted_status.user.screen_name).append(" :")
+					.append(status.retweeted_status.text);
+			holder.textRetstatus.setText(new WeiboText(sb.toString(), WeiboText.GRAB_LINKS));
+			if (status.retweeted_status.pic_urls != null && !status.retweeted_status.pic_urls.isEmpty()) {
+				if (holder.multiRetPicUrls.getTag() != null) {
+					holder.multiRetPicUrls.removeAllPictures();
+				}
+				Log.e(TAG, "position="+position);
+				holder.multiRetPicUrls.removeAllPictures();
+				holder.multiRetPicUrls.setTag(position);
+				holder.multiRetPicUrls.setPicUrls(status.retweeted_status.pic_urls);
+				holder.multiRetPicUrls.setVisibility(View.VISIBLE);
+			}else{
+				holder.multiRetPicUrls.setVisibility(View.GONE);
 			}
 		}
 	}
@@ -192,5 +217,8 @@ public class FriendsTimelineAdapter extends BaseAdapter {
 		TextView textContent;
 		ImageView imageImage;
 		MultiImageView multiPicUrls;
+		LinearLayout layoutRetweeted;
+		TextView textRetstatus;
+		MultiImageView multiRetPicUrls;
 	}
 }
