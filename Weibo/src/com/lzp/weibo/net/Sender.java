@@ -1,5 +1,7 @@
 package com.lzp.weibo.net;
 
+import java.net.URL;
+
 import com.android.volley.Request;
 import com.android.volley.Request.Method;
 import com.android.volley.RequestQueue;
@@ -7,9 +9,11 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.lzp.weibo.msg.ToServiceMsg;
 import com.lzp.weibo.net.listener.BaseResponseListener;
+import com.lzp.weibo.net.listener.CommentsListener;
 import com.lzp.weibo.net.listener.ResponListenerCreator;
 
 import android.content.Context;
+import android.net.Uri;
 import android.util.Log;
 
 public class Sender {
@@ -44,7 +48,6 @@ public class Sender {
 		Log.e("Test", "Sender addToRequestQueue mRequestQueue=" + mRequestQueue);
 		if (mRequestQueue != null) {
 			BaseResponseListener listener = mResponListenerCreator.createResponListener(msg.getCmd());
-			
 			StringRequest request = new StringRequest(Method.GET, msg.getUrl(), listener, listener);
 			addToRequestQueue(request);
 		}

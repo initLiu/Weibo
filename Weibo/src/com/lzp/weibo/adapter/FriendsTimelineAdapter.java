@@ -7,6 +7,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.lzp.weibo.R;
 import com.lzp.weibo.text.WeiboText;
+import com.lzp.weibo.widget.CommentLayout;
 import com.lzp.weibo.widget.MultiImageView;
 import com.sina.weibo.sdk.openapi.models.Status;
 import com.sina.weibo.sdk.openapi.models.StatusList;
@@ -20,6 +21,7 @@ import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
@@ -33,11 +35,12 @@ import android.widget.TextView;
  * @author SKJP
  *
  */
-public class FriendsTimelineAdapter extends BaseAdapter {
+public class FriendsTimelineAdapter extends BaseAdapter{
 
 	private static final String TAG = FriendsTimelineAdapter.class.getSimpleName();
 	private StatusList mStatusList;
 	private Context mContext;
+	private GetCommentsListener mCommentsListener;
 	private Map<String, Integer> mMonths = new HashMap<String, Integer>();
 	{
 		mMonths.put("Jan", 1);
@@ -54,9 +57,10 @@ public class FriendsTimelineAdapter extends BaseAdapter {
 		mMonths.put("Dec", 12);
 	}
 
-	public FriendsTimelineAdapter(Context context) {
+	public FriendsTimelineAdapter(Context context,GetCommentsListener listener) {
 		mContext = context;
 		mStatusList = new StatusList();
+		mCommentsListener = listener;
 	}
 
 	public void setData(StatusList statusList) {
@@ -101,6 +105,12 @@ public class FriendsTimelineAdapter extends BaseAdapter {
 			holder.layoutRetweeted = (LinearLayout)convertView.findViewById(R.id.retweeted_status_layout);
 			holder.textRetstatus = (TextView)convertView.findViewById(R.id.retweeted_status_content);
 			holder.multiRetPicUrls = (MultiImageView)convertView.findViewById(R.id.retweeted_status_pic_urls);
+			holder.layoutBottomBarComment = (LinearLayout)convertView.findViewById(R.id.friend_status_bottom_bar_comment);
+			holder.layoutBottomBarRepost = (LinearLayout)convertView.findViewById(R.id.friend_status_bottom_bar_repost);
+			holder.textBottomBarCommnetNum = (TextView)convertView.findViewById(R.id.friend_status_bottom_bar_comment_num);
+			holder.textBottomBarRepostNum = (TextView)convertView.findViewById(R.id.friend_status_bottom_bar_repost_num);
+//			holder.layoutBottomBarRepost.setOnClickListener(this);
+			holder.layoutComment = (CommentLayout)convertView.findViewById(R.id.friend_status_comments);
 			convertView.setTag(holder);
 		} else {
 			holder = (ViewHolder) convertView.getTag();
@@ -124,7 +134,13 @@ public class FriendsTimelineAdapter extends BaseAdapter {
 		holder.textContent.setLinkTextColor(Color.parseColor("#1C86EE"));
 		holder.textContent.setText(new WeiboText(status.text, WeiboText.GRAB_LINKS));
 
-		if (status.pic_urls != null && !status.pic_urls.isEmpty()) {			
+		if (status.pic_urls != null && !status.pic_urls.isEmpty()) {	
+			//解决listview图片加载错位问题。图片加载错位是由于convertView复用导致的
+			//1、原因分析
+			//ListView item缓存机制：为了使得性能更优，ListView会缓存行item(某行对应的View)。ListView通过adapter的getView函数获得每行的item。滑动过程中，
+			//a. 如果某行item已经滑出屏幕，若该item不在缓存内，则put进缓存，否则更新缓存；
+			//b. 获取滑入屏幕的行item之前会先判断缓存中是否有可用的item，如果有，做为convertView参数传递给adapter的getView。
+			//给每个View添加一个tag，加载之前先判断这个view有没有tag，如果有表示这个view是复用的之前就清除掉这个view的图片，重新加载新的图片
 			if (holder.multiPicUrls.getTag() != null) {
 				holder.multiPicUrls.removeAllPictures();
 			}
@@ -159,7 +175,6 @@ public class FriendsTimelineAdapter extends BaseAdapter {
 				if (holder.multiRetPicUrls.getTag() != null) {
 					holder.multiRetPicUrls.removeAllPictures();
 				}
-				Log.e(TAG, "position="+position);
 				holder.multiRetPicUrls.removeAllPictures();
 				holder.multiRetPicUrls.setTag(position);
 				holder.multiRetPicUrls.setPicUrls(status.retweeted_status.pic_urls);
@@ -167,6 +182,17 @@ public class FriendsTimelineAdapter extends BaseAdapter {
 			}else{
 				holder.multiRetPicUrls.setVisibility(View.GONE);
 			}
+		}
+		
+		holder.layoutBottomBarComment.setOnClickListener(new CommentClickListener(holder.layoutComment, status.id));
+		holder.textBottomBarCommnetNum.setText(mContext.getResources().getString(R.string.comment));
+		holder.layoutBottomBarComment.setTag(status.id);//设置微博id，在获取评论的时候需要用到
+		if (status.comments_count != 0) {
+			holder.textBottomBarCommnetNum.setText(status.comments_count + "");
+		}
+		holder.textBottomBarRepostNum.setText(mContext.getResources().getString(R.string.report));
+		if (status.reposts_count != 0) {
+			holder.textBottomBarRepostNum.setText(status.reposts_count + "");
 		}
 	}
 
@@ -220,5 +246,37 @@ public class FriendsTimelineAdapter extends BaseAdapter {
 		LinearLayout layoutRetweeted;
 		TextView textRetstatus;
 		MultiImageView multiRetPicUrls;
+		LinearLayout layoutBottomBarComment;
+		LinearLayout layoutBottomBarRepost;
+		TextView textBottomBarCommnetNum;
+		TextView textBottomBarRepostNum;
+		CommentLayout layoutComment;
+	}
+
+	class CommentClickListener implements OnClickListener {
+
+		/** 评论list*/
+		private View commentLayout;
+		/** 微博id*/
+		private String id;
+
+		public CommentClickListener(View commentlayout,String id) {
+			this.commentLayout = commentlayout;
+			this.id = id;
+		}
+
+		@Override
+		public void onClick(View v) {
+			mCommentsListener.getComments(id, commentLayout);
+		}
+	}
+	
+	public interface GetCommentsListener {
+		/**
+		 * 获取微博评论列表
+		 * @param id 微博id
+		 * @param commentLayout 显示评论列表的view
+		 */
+		public void getComments(String id, View commentLayout);
 	}
 }

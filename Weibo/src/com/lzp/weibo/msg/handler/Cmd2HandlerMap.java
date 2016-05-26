@@ -28,5 +28,6 @@ public class Cmd2HandlerMap {
 		cmdHandlerMap.put(Command.friends_timeline.ordinal(), new int[] { AppInterface.FRIENDSTIMELINE_HANDLER });
 		cmdHandlerMap.put(Command.friends_timeline_old.ordinal(), new int[] { AppInterface.FRIENDSTIMELINE_HANDLER_OLD });
 		cmdHandlerMap.put(Command.error.ordinal(), new int[] { AppInterface.ERROR });
+		cmdHandlerMap.put(Command.comments.ordinal(), new int[] { AppInterface.COMMENTS });
 	}
 }

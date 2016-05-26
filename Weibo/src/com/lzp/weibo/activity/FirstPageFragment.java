@@ -1,17 +1,23 @@
 package com.lzp.weibo.activity;
 
+import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
 
 import com.lzp.weibo.R;
 import com.lzp.weibo.adapter.FriendsTimelineAdapter;
+import com.lzp.weibo.adapter.FriendsTimelineAdapter.GetCommentsListener;
 import com.lzp.weibo.app.AccessTokenKeeper;
 import com.lzp.weibo.app.AppInterface;
 import com.lzp.weibo.app.BaseApplication;
 import com.lzp.weibo.msg.Command;
+import com.lzp.weibo.msg.CommentsManager;
 import com.lzp.weibo.msg.MessageFacade;
 import com.lzp.weibo.msg.MessageFacade.ObserverData;
+import com.lzp.weibo.widget.CommentLayout;
 import com.sina.weibo.sdk.auth.Oauth2AccessToken;
+import com.sina.weibo.sdk.openapi.models.Comment;
+import com.sina.weibo.sdk.openapi.models.CommentList;
 import com.sina.weibo.sdk.openapi.models.StatusList;
 
 import android.os.Bundle;
@@ -26,6 +32,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.View.OnClickListener;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.ListView;
@@ -37,7 +44,7 @@ import android.widget.Toast;
  * @author SKJP
  *
  */
-public class FirstPageFragment extends Fragment implements OnRefreshListener, OnScrollListener, Callback {
+public class FirstPageFragment extends Fragment implements OnRefreshListener, OnScrollListener, Callback ,GetCommentsListener{
 
 	public static final String TAG = FirstPageFragment.class.getSimpleName();
 
@@ -48,11 +55,13 @@ public class FirstPageFragment extends Fragment implements OnRefreshListener, On
 	private boolean mIsloading = false;
 	private boolean mShowLoading = false;
 	private View mLoadView;
+	private CommentsManager commentsManager;
 
 	private static final int UPDATE_STATUSLIST = 1;
 	private static final int REFRESH_DONE = 2;
 	private static final int ADD_HISTORY = 3;
 	private static final int ERROR = 4;
+	private static final int COMMENTS = 5;
 	
 	private static final int DELAY_TIME = 2000;
 	private Handler mHandler = new Handler(this);
@@ -67,14 +76,18 @@ public class FirstPageFragment extends Fragment implements OnRefreshListener, On
 					Message msg = mHandler.obtainMessage(UPDATE_STATUSLIST);
 					msg.obj = obData.data;
 					mHandler.sendMessage(msg);
-				}else if(obData.cmd==Command.friends_timeline_old){
+				} else if (obData.cmd == Command.friends_timeline_old) {
 					Message msg = mHandler.obtainMessage(ADD_HISTORY);
 					msg.obj = obData.data;
 					mHandler.sendMessageDelayed(msg, DELAY_TIME);
-				}else if(obData.cmd==Command.error){
+				} else if (obData.cmd == Command.error) {
 					Message msg = mHandler.obtainMessage(ERROR);
 					msg.obj = obData.data;
 					mHandler.sendMessageDelayed(msg, DELAY_TIME);
+				} else if (obData.cmd == Command.comments) {
+					Message msg = mHandler.obtainMessage(COMMENTS);
+					msg.obj = obData.data;
+					mHandler.sendMessage(msg);
 				}
 			}
 		}
@@ -105,7 +118,7 @@ public class FirstPageFragment extends Fragment implements OnRefreshListener, On
 		mList = (ListView) view.findViewById(R.id.firstpage_list);
 		mSwipeRefreshWidget.setColorScheme(R.color.color1, R.color.color2, R.color.color3, R.color.color4);
 		mSwipeRefreshWidget.setOnRefreshListener(this);
-		mAdapter = new FriendsTimelineAdapter(getActivity());
+		mAdapter = new FriendsTimelineAdapter(getActivity(), this);
 		mList.setAdapter(mAdapter);
 		mList.setOnScrollListener(this);
 
@@ -222,9 +235,39 @@ public class FirstPageFragment extends Fragment implements OnRefreshListener, On
 			mIsloading = false;
 			Toast.makeText(getActivity(), "请求失败:"+data.toString(), Toast.LENGTH_SHORT).show();
 			break;
+		case COMMENTS:
+			CommentList comments = (CommentList) data;
+			if (commentsManager != null) {
+				ArrayList<Comment> commentList = comments.commentList;
+				if (commentList != null && !commentList.isEmpty()) {
+					String wid = commentList.get(0).status.id;// 获取微博id
+					CommentLayout layout = (CommentLayout) commentsManager.getComment(wid);
+					Log.e(TAG, "comments="+commentList.size());
+					layout.addComments(comments);
+				}
+			}
+			break;
 		default:
 			break;
 		}
 		return true;
+	}
+	
+	//获取某条微博的评论
+	private void getComment(String id){
+		MessageFacade messageFacade = mApp.getMessageFacade();
+		Oauth2AccessToken token = AccessTokenKeeper.readAccessToken(getActivity());
+		messageFacade.sendRequest(Command.comments,
+				"https://api.weibo.com/2/comments/show.json?access_token=" + token.getToken() + "&id="
+						+ id);
+	}
+
+	@Override
+	public void getComments(String id, View commentLayout) {
+		if (commentsManager == null) {
+			commentsManager = new CommentsManager();
+		}
+		commentsManager.addComment(id, commentLayout);
+		getComment(id);
 	}
 }

@@ -14,6 +14,11 @@ import android.widget.ImageView.ScaleType;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 
+/**
+ * 多个图片表格式排列显示
+ * @author SKJP
+ *
+ */
 public class MultiImageView extends TableLayout {
 	public static final String TAG = MultiImageView.class.getSimpleName();
 	
@@ -66,7 +71,6 @@ public class MultiImageView extends TableLayout {
 						Glide.with(getContext()).load(url).diskCacheStrategy(DiskCacheStrategy.SOURCE)
 								.placeholder(R.drawable.image_default).centerCrop().into(imageView);
 					} else {
-						Log.e(TAG, "url=" + url);
 						Glide.with(getContext()).load(url).placeholder(R.drawable.image_default).centerCrop()
 								.into(imageView);
 					}

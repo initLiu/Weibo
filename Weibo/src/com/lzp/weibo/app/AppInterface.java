@@ -8,6 +8,7 @@ import com.lzp.weibo.msg.ToAppMsg;
 import com.lzp.weibo.msg.ToServiceMsg;
 import com.lzp.weibo.msg.handler.BusinessHandler;
 import com.lzp.weibo.msg.handler.Cmd2HandlerMap;
+import com.lzp.weibo.msg.handler.CommentsHandler;
 import com.lzp.weibo.msg.handler.ErrorHandler;
 import com.lzp.weibo.msg.handler.FriendsTimelineHandler;
 import com.lzp.weibo.msg.handler.FriendsTimelineHandlerOld;
@@ -26,6 +27,7 @@ public class AppInterface extends AppRuntime {
 	public static final int FRIENDSTIMELINE_HANDLER = USERSHOW_HANDLER + 1;
 	public static final int FRIENDSTIMELINE_HANDLER_OLD = FRIENDSTIMELINE_HANDLER + 1;
 	public static final int ERROR = FRIENDSTIMELINE_HANDLER_OLD + 1;
+	public static final int COMMENTS = ERROR + 1;
 
 	private BusinessHandler[] mHandlers = new BusinessHandler[HANDLER_SIZE];
 	private MessageFacade mMessageFacade;
@@ -91,6 +93,9 @@ public class AppInterface extends AppRuntime {
 			break;
 		case ERROR:
 			handler = new ErrorHandler(this);
+			break;
+		case COMMENTS:
+			handler = new CommentsHandler(this);
 			break;
 		default:
 			break;

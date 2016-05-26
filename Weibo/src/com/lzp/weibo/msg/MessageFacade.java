@@ -12,6 +12,8 @@ import com.lzp.weibo.data.WeiboDatabase.Urls;
 import com.lzp.weibo.msg.handler.BusinessHandler;
 import com.lzp.weibo.msg.handler.FriendsTimelineHandler;
 import com.lzp.weibo.msg.handler.OwnerUserShowHandler;
+import com.sina.weibo.sdk.openapi.models.Comment;
+import com.sina.weibo.sdk.openapi.models.CommentList;
 import com.sina.weibo.sdk.openapi.models.StatusList;
 import com.sina.weibo.sdk.openapi.models.User;
 
@@ -49,6 +51,8 @@ public class MessageFacade extends Observable {
 			handler = mApp.getBusinessHandler(AppInterface.FRIENDSTIMELINE_HANDLER);
 		} else if (cmd == Command.friends_timeline_old) {
 			handler = mApp.getBusinessHandler(AppInterface.FRIENDSTIMELINE_HANDLER_OLD);
+		} else if (cmd == Command.comments) {
+			handler = mApp.getBusinessHandler(AppInterface.COMMENTS);
 		}
 		return handler.sendRequest(cmd, url);
 	}
@@ -77,6 +81,8 @@ public class MessageFacade extends Observable {
 				return;
 			}
 			data = statusList;
+		} else if (cmd == Command.comments) {
+			data = CommentList.parse(response);
 		}
 
 		insert2DB(cmd, cacheUrl, response);
@@ -96,7 +102,7 @@ public class MessageFacade extends Observable {
 	 */
 	private void insert2DB(Command cmd, String cacheUrl, String response) {
 		Log.e(TAG, "MessageFacade insert2DB");
-		if (cmd == Command.friends_timeline_old) {
+		if (TextUtils.isEmpty(cacheUrl) || cmd == Command.friends_timeline_old || cmd == Command.comments) {
 			return;
 		}
 		Uri uri = Urls.CONTENT_URI;
@@ -145,6 +151,10 @@ public class MessageFacade extends Observable {
 			setChanged();
 			data.data = response;
 			notifyObservers(data);
+		} else if (cmd == Command.comments) {
+			setChanged();
+			data.data = response;
+			notifyObservers(data);
 		}
 	}
 
@@ -164,7 +174,9 @@ public class MessageFacade extends Observable {
 	 */
 	private void insert2Cache(Command cmd, String cacheUrl, String response, Object data) {
 		Log.e(TAG, "MessageFacade insert2Cache");
-
+		if (TextUtils.isEmpty(cacheUrl)) {
+			return;
+		}
 		// 缓存url请求返回的数据
 		if (cmd == Command.owner_users_show) {// 账号信息
 			// 缓存url请求

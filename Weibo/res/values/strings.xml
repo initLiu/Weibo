@@ -9,5 +9,7 @@
     <string name="first_page">首页</string>
     <string name="openDrawer">打开</string>
     <string name="closeDrawer">关闭</string>
+    <string name="comment">评论</string>
+    <string name="report">转发</string>
 
 </resources>

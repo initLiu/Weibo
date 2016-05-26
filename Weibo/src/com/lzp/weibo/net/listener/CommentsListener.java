@@ -1,14 +1,12 @@
 package com.lzp.weibo.net.listener;
 
 import com.lzp.weibo.msg.Command;
-import com.lzp.weibo.msg.RequestUrlContasts;
 import com.lzp.weibo.msg.ToAppMsg;
 import com.lzp.weibo.net.NetCore;
 
-public class FriendsTimelineListener extends BaseResponseListener {
-	public static final String TAG = FriendsTimelineListener.class.getSimpleName();
+public class CommentsListener extends BaseResponseListener {
 
-	public FriendsTimelineListener(NetCore netCore) {
+	public CommentsListener(NetCore netCore) {
 		super(netCore);
 		// TODO Auto-generated constructor stub
 	}
@@ -16,14 +14,13 @@ public class FriendsTimelineListener extends BaseResponseListener {
 	@Override
 	public void onResponse(String response) {
 		ToAppMsg msg = new ToAppMsg();
-		msg.setCmd(Command.friends_timeline);
-		msg.setUrl(url);
+		msg.setCmd(Command.comments);
+		msg.setUrl(null);
 		msg.setResponse(response);
 		netCore.addResponseToQueue(msg);
 	}
 
 	@Override
 	protected void setUrl() {
-		url = RequestUrlContasts.FRIENDS_TIMELINE;
 	}
 }
