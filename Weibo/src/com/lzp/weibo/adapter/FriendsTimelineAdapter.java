@@ -40,7 +40,6 @@ public class FriendsTimelineAdapter extends BaseAdapter{
 	private static final String TAG = FriendsTimelineAdapter.class.getSimpleName();
 	private StatusList mStatusList;
 	private Context mContext;
-	private GetCommentsListener mCommentsListener;
 	private Map<String, Integer> mMonths = new HashMap<String, Integer>();
 	{
 		mMonths.put("Jan", 1);
@@ -57,10 +56,9 @@ public class FriendsTimelineAdapter extends BaseAdapter{
 		mMonths.put("Dec", 12);
 	}
 
-	public FriendsTimelineAdapter(Context context,GetCommentsListener listener) {
+	public FriendsTimelineAdapter(Context context) {
 		mContext = context;
 		mStatusList = new StatusList();
-		mCommentsListener = listener;
 	}
 
 	public void setData(StatusList statusList) {
@@ -109,8 +107,11 @@ public class FriendsTimelineAdapter extends BaseAdapter{
 			holder.layoutBottomBarRepost = (LinearLayout)convertView.findViewById(R.id.friend_status_bottom_bar_repost);
 			holder.textBottomBarCommnetNum = (TextView)convertView.findViewById(R.id.friend_status_bottom_bar_comment_num);
 			holder.textBottomBarRepostNum = (TextView)convertView.findViewById(R.id.friend_status_bottom_bar_repost_num);
-//			holder.layoutBottomBarRepost.setOnClickListener(this);
 			holder.layoutComment = (CommentLayout)convertView.findViewById(R.id.friend_status_comments);
+			holder.layoutComment.setTag(position);
+			
+			holder.layoutBottomBarComment.setOnClickListener(new CommentClickListener(holder.layoutComment, position));
+			
 			convertView.setTag(holder);
 		} else {
 			holder = (ViewHolder) convertView.getTag();
@@ -183,16 +184,21 @@ public class FriendsTimelineAdapter extends BaseAdapter{
 				holder.multiRetPicUrls.setVisibility(View.GONE);
 			}
 		}
-		
-		holder.layoutBottomBarComment.setOnClickListener(new CommentClickListener(holder.layoutComment, status.id));
+
 		holder.textBottomBarCommnetNum.setText(mContext.getResources().getString(R.string.comment));
-		holder.layoutBottomBarComment.setTag(status.id);//设置微博id，在获取评论的时候需要用到
 		if (status.comments_count != 0) {
 			holder.textBottomBarCommnetNum.setText(status.comments_count + "");
 		}
 		holder.textBottomBarRepostNum.setText(mContext.getResources().getString(R.string.report));
 		if (status.reposts_count != 0) {
 			holder.textBottomBarRepostNum.setText(status.reposts_count + "");
+		}
+		
+		if (holder.layoutComment.getVisibility(position) == null
+				|| holder.layoutComment.getVisibility(position) != View.VISIBLE) {
+			holder.layoutComment.setVisibility(position, View.GONE);
+		} else {
+			holder.layoutComment.setVisibility(position, View.VISIBLE);
 		}
 	}
 
@@ -235,6 +241,25 @@ public class FriendsTimelineAdapter extends BaseAdapter{
 		return "";
 	}
 
+	class CommentClickListener implements OnClickListener {
+		View commentList;
+		int position;
+
+		public CommentClickListener(View commentList,int position) {
+			this.commentList = commentList;
+			this.position = position;
+		}
+
+		@Override
+		public void onClick(View v) {
+			if (commentList.getVisibility() == View.VISIBLE) {
+				((CommentLayout)commentList).setVisibility(position, View.GONE);
+			} else {
+				((CommentLayout)commentList).setVisibility(position, View.VISIBLE);
+			}
+		}
+	}
+	
 	class ViewHolder {
 		ImageView imageFace;
 		TextView textName;
@@ -252,31 +277,5 @@ public class FriendsTimelineAdapter extends BaseAdapter{
 		TextView textBottomBarRepostNum;
 		CommentLayout layoutComment;
 	}
-
-	class CommentClickListener implements OnClickListener {
-
-		/** 评论list*/
-		private View commentLayout;
-		/** 微博id*/
-		private String id;
-
-		public CommentClickListener(View commentlayout,String id) {
-			this.commentLayout = commentlayout;
-			this.id = id;
-		}
-
-		@Override
-		public void onClick(View v) {
-			mCommentsListener.getComments(id, commentLayout);
-		}
-	}
-	
-	public interface GetCommentsListener {
-		/**
-		 * 获取微博评论列表
-		 * @param id 微博id
-		 * @param commentLayout 显示评论列表的view
-		 */
-		public void getComments(String id, View commentLayout);
-	}
 }
+

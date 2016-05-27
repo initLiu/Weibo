@@ -6,7 +6,6 @@ import java.util.Observer;
 
 import com.lzp.weibo.R;
 import com.lzp.weibo.adapter.FriendsTimelineAdapter;
-import com.lzp.weibo.adapter.FriendsTimelineAdapter.GetCommentsListener;
 import com.lzp.weibo.app.AccessTokenKeeper;
 import com.lzp.weibo.app.AppInterface;
 import com.lzp.weibo.app.BaseApplication;
@@ -32,7 +31,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.View.OnClickListener;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.ListView;
@@ -44,7 +42,7 @@ import android.widget.Toast;
  * @author SKJP
  *
  */
-public class FirstPageFragment extends Fragment implements OnRefreshListener, OnScrollListener, Callback ,GetCommentsListener{
+public class FirstPageFragment extends Fragment implements OnRefreshListener, OnScrollListener, Callback{
 
 	public static final String TAG = FirstPageFragment.class.getSimpleName();
 
@@ -118,7 +116,7 @@ public class FirstPageFragment extends Fragment implements OnRefreshListener, On
 		mList = (ListView) view.findViewById(R.id.firstpage_list);
 		mSwipeRefreshWidget.setColorScheme(R.color.color1, R.color.color2, R.color.color3, R.color.color4);
 		mSwipeRefreshWidget.setOnRefreshListener(this);
-		mAdapter = new FriendsTimelineAdapter(getActivity(), this);
+		mAdapter = new FriendsTimelineAdapter(getActivity());
 		mList.setAdapter(mAdapter);
 		mList.setOnScrollListener(this);
 
@@ -260,14 +258,5 @@ public class FirstPageFragment extends Fragment implements OnRefreshListener, On
 		messageFacade.sendRequest(Command.comments,
 				"https://api.weibo.com/2/comments/show.json?access_token=" + token.getToken() + "&id="
 						+ id);
-	}
-
-	@Override
-	public void getComments(String id, View commentLayout) {
-		if (commentsManager == null) {
-			commentsManager = new CommentsManager();
-		}
-		commentsManager.addComment(id, commentLayout);
-		getComment(id);
 	}
 }

@@ -2,8 +2,11 @@
 <resources>
     <color name="white">#FFFFFF</color>
     <drawable name="blue">#1E90FF</drawable>
+    <drawable name="blue1">#87CEEB</drawable>
+    <drawable name="black">#3B3B3B</drawable>
     <color name="color1">#ff0f9d58</color>
     <color name="color2">#ffdb4437</color>
     <color name="color3">#ff4285f4</color>
     <color name="color4">#fff4b400</color>
+    <color name="blue">#87CEFA</color>
 </resources>

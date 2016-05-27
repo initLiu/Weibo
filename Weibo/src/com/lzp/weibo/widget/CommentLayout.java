@@ -1,6 +1,8 @@
 package com.lzp.weibo.widget;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.lzp.weibo.R;
 import com.sina.weibo.sdk.openapi.models.Comment;
@@ -16,6 +18,7 @@ import android.widget.TextView;
 public class CommentLayout extends ScrollView {
 
 	private LinearLayout mLinearLayout;
+	private static Map<Integer, Integer> status = new HashMap<Integer, Integer>();
 
 	public CommentLayout(Context context, AttributeSet attrs, int defStyleAttr) {
 		super(context, attrs, defStyleAttr);
@@ -38,6 +41,18 @@ public class CommentLayout extends ScrollView {
 		addView(mLinearLayout);
 
 		setVerticalScrollBarEnabled(false);// 不显示滚动条
+//		Comment comment = new Comment();
+//		comment.text=",mnzx,cvnz,xcvn,zcvn,zcvn,alsdjflasjkdflajkdflajdf";
+//		addComment(comment);
+//		addComment(comment);
+//		addComment(comment);
+//		addComment(comment);
+//		addComment(comment);
+//		addComment(comment);
+//		addComment(comment);
+//		addComment(comment);
+//		addComment(comment);
+//		addComment(comment);
 	}
 
 	public void addComment(Comment comment) {
@@ -58,7 +73,7 @@ public class CommentLayout extends ScrollView {
 		author.setLayoutParams(
 				new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 		author.setTextColor(getContext().getColor(R.color.white));
-		author.setText(comment.user.screen_name+" :");
+		author.setText(comment.user.screen_name + " :");
 
 		TextView content = new TextView(getContext());
 		content.setLayoutParams(
@@ -74,5 +89,14 @@ public class CommentLayout extends ScrollView {
 		layout.addView(content);
 
 		mLinearLayout.addView(layout);
+	}
+	
+	public void setVisibility(int position, int visibility) {
+		status.put(position, visibility);
+		setVisibility(visibility);
+	}
+	
+	public Integer getVisibility(int position){
+		return status.get(position);
 	}
 }
