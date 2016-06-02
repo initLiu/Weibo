@@ -653,7 +653,7 @@ public class WeiboText implements Spannable, GetChars, Cloneable {
 	/**
 	 * @ 正则表达式
 	 */
-	public static final String AT = "@[a-zA-Z0-9\u4e00-\u9fa5]+";
+	public static final String AT = "@[a-zA-Z0-9\u4e00-\u9fa5_-]+";
 
 	// 所有链接的的正则表达式
 	protected static final String LINK_REGEX = WEB_URL.pattern() + "|" + AT + "|" + TOPIC;
