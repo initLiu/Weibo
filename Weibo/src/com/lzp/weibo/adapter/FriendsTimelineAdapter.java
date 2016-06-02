@@ -9,6 +9,7 @@ import com.lzp.weibo.R;
 import com.lzp.weibo.text.WeiboText;
 import com.lzp.weibo.widget.CommentLayout;
 import com.lzp.weibo.widget.MultiImageView;
+import com.sina.weibo.sdk.openapi.models.CommentList;
 import com.sina.weibo.sdk.openapi.models.Status;
 import com.sina.weibo.sdk.openapi.models.StatusList;
 
@@ -108,9 +109,8 @@ public class FriendsTimelineAdapter extends BaseAdapter{
 			holder.textBottomBarCommnetNum = (TextView)convertView.findViewById(R.id.friend_status_bottom_bar_comment_num);
 			holder.textBottomBarRepostNum = (TextView)convertView.findViewById(R.id.friend_status_bottom_bar_repost_num);
 			holder.layoutComment = (CommentLayout)convertView.findViewById(R.id.friend_status_comments);
-			holder.layoutComment.setTag(position);
 			
-			holder.layoutBottomBarComment.setOnClickListener(new CommentClickListener(holder.layoutComment, position));
+			holder.layoutBottomBarComment.setOnClickListener(new CommentClickListener(holder));
 			
 			convertView.setTag(holder);
 		} else {
@@ -124,6 +124,11 @@ public class FriendsTimelineAdapter extends BaseAdapter{
 
 	private void fillData(ViewHolder holder, int position) {
 		Status status = mStatusList.statusList.get(position);
+		if (status == null) {
+			return;
+		}
+		holder.weiId = status.id;
+		
 		Glide.with(mContext).load(status.user.profile_image_url).crossFade().placeholder(R.drawable.ic_weibo)
 				.into(holder.imageFace);
 		holder.textName.setText(status.user.screen_name);
@@ -169,8 +174,11 @@ public class FriendsTimelineAdapter extends BaseAdapter{
 		} else {
 			holder.layoutRetweeted.setVisibility(View.VISIBLE);
 			StringBuilder sb = new StringBuilder();
-			sb.append("@").append(status.retweeted_status.user.screen_name).append(" :")
-					.append(status.retweeted_status.text);
+			String sname ="";
+			if (status.retweeted_status.user != null) {
+				sname = status.retweeted_status.user.screen_name;
+			}
+			sb.append("@").append(sname).append(" :").append(status.retweeted_status.text);
 			holder.textRetstatus.setText(new WeiboText(sb.toString(), WeiboText.GRAB_LINKS));
 			if (status.retweeted_status.pic_urls != null && !status.retweeted_status.pic_urls.isEmpty()) {
 				if (holder.multiRetPicUrls.getTag() != null) {
@@ -193,13 +201,10 @@ public class FriendsTimelineAdapter extends BaseAdapter{
 		if (status.reposts_count != 0) {
 			holder.textBottomBarRepostNum.setText(status.reposts_count + "");
 		}
-		
-		if (holder.layoutComment.getVisibility(position) == null
-				|| holder.layoutComment.getVisibility(position) != View.VISIBLE) {
-			holder.layoutComment.setVisibility(position, View.GONE);
-		} else {
-			holder.layoutComment.setVisibility(position, View.VISIBLE);
-		}
+
+		//设置评论区是否显示
+//		Log.e(TAG, "visible="+holder.layoutComment.getVisibility(position)+",position="+position);
+		holder.layoutComment.setVisibility(status.id, holder.layoutComment.getVisibility(status.id));
 	}
 
 	private String formatTime(String createdtime) {
@@ -242,20 +247,18 @@ public class FriendsTimelineAdapter extends BaseAdapter{
 	}
 
 	class CommentClickListener implements OnClickListener {
-		View commentList;
-		int position;
+		ViewHolder holder;
 
-		public CommentClickListener(View commentList,int position) {
-			this.commentList = commentList;
-			this.position = position;
+		public CommentClickListener(ViewHolder holder) {
+			this.holder = holder;
 		}
 
 		@Override
 		public void onClick(View v) {
-			if (commentList.getVisibility() == View.VISIBLE) {
-				((CommentLayout)commentList).setVisibility(position, View.GONE);
+			if (holder.layoutComment.getVisibility(holder.weiId) == View.VISIBLE) {
+				holder.layoutComment.setVisibility(holder.weiId, View.GONE);
 			} else {
-				((CommentLayout)commentList).setVisibility(position, View.VISIBLE);
+				holder.layoutComment.setVisibility(holder.weiId, View.VISIBLE);
 			}
 		}
 	}
@@ -276,6 +279,7 @@ public class FriendsTimelineAdapter extends BaseAdapter{
 		TextView textBottomBarCommnetNum;
 		TextView textBottomBarRepostNum;
 		CommentLayout layoutComment;
+		String weiId;
 	}
 }
 

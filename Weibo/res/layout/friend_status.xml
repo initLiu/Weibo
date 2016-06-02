@@ -176,8 +176,8 @@
         android:id="@+id/friend_status_comments"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:maxHeight="100dp"
         android:layout_below="@id/friend_status_bottom_bar"
+        android:background="#5B5B5B"
         android:visibility="gone" />
 
 </RelativeLayout>

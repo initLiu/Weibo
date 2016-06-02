@@ -116,6 +116,22 @@ public class FirstPageFragment extends Fragment implements OnRefreshListener, On
 		mList = (ListView) view.findViewById(R.id.firstpage_list);
 		mSwipeRefreshWidget.setColorScheme(R.color.color1, R.color.color2, R.color.color3, R.color.color4);
 		mSwipeRefreshWidget.setOnRefreshListener(this);
+		
+		// 一下4行是为了解bug：E/AndroidRuntime(9319):
+		// java.lang.ClassCastException:
+		// com.lzp.weibo.adapter.FriendsTimelineAdapter cannot be cast to
+		// android.widget.HeaderViewListAdapter
+		// 06-02 14:10:08.186: E/AndroidRuntime(9319): at
+		// android.widget.ListView.removeFooterView(ListView.java:387)
+		// 06-02 14:10:08.186: E/AndroidRuntime(9319): at
+		// com.lzp.weibo.activity.FirstPageFragment.handleMessage(FirstPageFragment.java:216)
+		//原因：Android4.4之前addHeaderView和addFooterView的调用用在setAdapter之前
+		
+		mLoadView = LayoutInflater.from(getActivity()).inflate(R.layout.list_item_loading, null);
+		mList.removeFooterView(mLoadView);
+		mList.addFooterView(mLoadView);
+		mLoadView.setVisibility(View.GONE);
+		
 		mAdapter = new FriendsTimelineAdapter(getActivity());
 		mList.setAdapter(mAdapter);
 		mList.setOnScrollListener(this);
@@ -167,9 +183,10 @@ public class FirstPageFragment extends Fragment implements OnRefreshListener, On
 
 	private void getHistory() {
 		Log.e(TAG, "FirstPageFragment getHistory");
-		mLoadView = LayoutInflater.from(getActivity()).inflate(R.layout.list_item_loading, null);
-		mList.removeFooterView(mLoadView);
-		mList.addFooterView(mLoadView);
+//		mLoadView = LayoutInflater.from(getActivity()).inflate(R.layout.list_item_loading, null);
+//		mList.removeFooterView(mLoadView);
+//		mList.addFooterView(mLoadView);
+		mLoadView.setVisibility(View.VISIBLE);
 		mList.smoothScrollToPosition(mAdapter.getCount()+1);
 		mIsloading = true;
 		addHistory();
@@ -213,7 +230,8 @@ public class FirstPageFragment extends Fragment implements OnRefreshListener, On
 			}
 			break;
 		case ADD_HISTORY:
-			mList.removeFooterView(mLoadView);
+//			mList.removeFooterView(mLoadView);
+			mLoadView.setVisibility(View.GONE);
 			mIsloading = false;
 			update = (boolean) data;
 			if (update) {
@@ -249,14 +267,5 @@ public class FirstPageFragment extends Fragment implements OnRefreshListener, On
 			break;
 		}
 		return true;
-	}
-	
-	//获取某条微博的评论
-	private void getComment(String id){
-		MessageFacade messageFacade = mApp.getMessageFacade();
-		Oauth2AccessToken token = AccessTokenKeeper.readAccessToken(getActivity());
-		messageFacade.sendRequest(Command.comments,
-				"https://api.weibo.com/2/comments/show.json?access_token=" + token.getToken() + "&id="
-						+ id);
 	}
 }
