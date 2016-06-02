@@ -15,7 +15,7 @@ public class FriendsTimelineHandler extends BusinessHandler {
 	}
 
 	public boolean sendRequest(Command cmd, String url) {
-		Log.e("Test", "FriendsTimelineHandler sendRequest cmd=" + cmd.name() + ",url=" + url);
+//		Log.e("Test", "FriendsTimelineHandler sendRequest cmd=" + cmd.name() + ",url=" + url);
 		if (TextUtils.isEmpty(url)) {
 			return false;
 		}

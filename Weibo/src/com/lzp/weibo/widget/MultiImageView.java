@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.lzp.weibo.R;
+import com.lzp.weibo.utils.Utils;
 
 import android.content.Context;
 import android.util.AttributeSet;
@@ -16,12 +17,13 @@ import android.widget.TableRow;
 
 /**
  * 多个图片表格式排列显示
+ * 
  * @author SKJP
  *
  */
 public class MultiImageView extends TableLayout {
 	public static final String TAG = MultiImageView.class.getSimpleName();
-	
+
 	private ArrayList<String> pic_urls;
 
 	public MultiImageView(Context context, AttributeSet attrs) {
@@ -49,6 +51,10 @@ public class MultiImageView extends TableLayout {
 			int rows = count / 3;
 			rows = count % 3 != 0 ? ++rows : rows;
 
+			int screenWidth = screenWidth = Utils.getScreenWidth(getContext());
+			screenWidth = Utils.px2dp(getContext(), screenWidth);
+			int maxSize = (screenWidth - 10) / (count >= 3 ? 3 : count);
+
 			for (int i = 0; i < rows; i++) {
 				TableRow tableRow = new TableRow(getContext());
 				for (int j = 0; j < 3; j++) {
@@ -58,12 +64,12 @@ public class MultiImageView extends TableLayout {
 					}
 					ImageView imageView = new ImageView(getContext());
 					imageView.setScaleType(ScaleType.FIT_XY);
-					imageView.setPadding(0, 0, dp2px(5), 0);
+					imageView.setPadding(0, 0, Utils.dp2px(getContext(), 5), 0);
 					imageView.setAdjustViewBounds(true);
-					imageView.setMaxWidth(dp2px(135));
-					imageView.setMaxHeight(dp2px(135));
-					imageView.setMinimumWidth(dp2px(45));
-					imageView.setMinimumHeight(dp2px(45));
+					imageView.setMaxWidth(Utils.dp2px(getContext(), maxSize));
+					imageView.setMaxHeight(Utils.dp2px(getContext(), maxSize));
+					imageView.setMinimumWidth(Utils.dp2px(getContext(), 45));
+					imageView.setMinimumHeight(Utils.dp2px(getContext(), 45));
 
 					tableRow.addView(imageView);
 					String url = pic_urls.get(i * 3 + j);
@@ -75,14 +81,9 @@ public class MultiImageView extends TableLayout {
 								.into(imageView);
 					}
 				}
-				tableRow.setPadding(0, dp2px(5), 0, 0);
+				tableRow.setPadding(0, Utils.dp2px(getContext(), 5), 0, 0);
 				addView(tableRow, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 			}
 		}
-	}
-
-	private int dp2px(int dp) {
-		float scrall = getContext().getResources().getDisplayMetrics().density;
-		return (int) (dp * scrall + 0.5f);
 	}
 }
