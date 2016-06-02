@@ -54,7 +54,7 @@ public class FirstPageFragment extends Fragment implements OnRefreshListener, On
 	private boolean mShowLoading = false;
 	private View mLoadView;
 	private CommentsManager commentsManager;
-
+	
 	private static final int UPDATE_STATUSLIST = 1;
 	private static final int REFRESH_DONE = 2;
 	private static final int ADD_HISTORY = 3;
@@ -117,7 +117,7 @@ public class FirstPageFragment extends Fragment implements OnRefreshListener, On
 		mSwipeRefreshWidget.setColorScheme(R.color.color1, R.color.color2, R.color.color3, R.color.color4);
 		mSwipeRefreshWidget.setOnRefreshListener(this);
 		
-		// 一下4行是为了解bug：E/AndroidRuntime(9319):
+		// 以下下6行是为了解bug：E/AndroidRuntime(9319):
 		// java.lang.ClassCastException:
 		// com.lzp.weibo.adapter.FriendsTimelineAdapter cannot be cast to
 		// android.widget.HeaderViewListAdapter
@@ -130,10 +130,9 @@ public class FirstPageFragment extends Fragment implements OnRefreshListener, On
 		mLoadView = LayoutInflater.from(getActivity()).inflate(R.layout.list_item_loading, null);
 		mList.removeFooterView(mLoadView);
 		mList.addFooterView(mLoadView);
-		mLoadView.setVisibility(View.GONE);
-		
 		mAdapter = new FriendsTimelineAdapter(getActivity());
 		mList.setAdapter(mAdapter);
+		mList.removeFooterView(mLoadView);
 		mList.setOnScrollListener(this);
 
 		mApp.getMessageFacade().addObserver(mStatusListObserver);
@@ -183,10 +182,8 @@ public class FirstPageFragment extends Fragment implements OnRefreshListener, On
 
 	private void getHistory() {
 		Log.e(TAG, "FirstPageFragment getHistory");
-//		mLoadView = LayoutInflater.from(getActivity()).inflate(R.layout.list_item_loading, null);
-//		mList.removeFooterView(mLoadView);
-//		mList.addFooterView(mLoadView);
-		mLoadView.setVisibility(View.VISIBLE);
+		mList.removeFooterView(mLoadView);
+		mList.addFooterView(mLoadView);
 		mList.smoothScrollToPosition(mAdapter.getCount()+1);
 		mIsloading = true;
 		addHistory();
@@ -230,8 +227,7 @@ public class FirstPageFragment extends Fragment implements OnRefreshListener, On
 			}
 			break;
 		case ADD_HISTORY:
-//			mList.removeFooterView(mLoadView);
-			mLoadView.setVisibility(View.GONE);
+			mList.removeFooterView(mLoadView);
 			mIsloading = false;
 			update = (boolean) data;
 			if (update) {
