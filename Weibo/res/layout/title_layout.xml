@@ -19,7 +19,7 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="10dp"
         android:layout_gravity="center_vertical"
-        android:textSize="@dimen/text_size_70"
+        android:textSize="@dimen/text_size_30"
         android:textColor="@color/white"
         android:text="@string/first_page" />
 

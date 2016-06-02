@@ -36,7 +36,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:text="@string/first_page"
-            android:textSize="@dimen/text_size_70"
+            android:textSize="@dimen/text_size_30"
             android:textColor="@color/white"
             android:background="@drawable/bg_textview"/>
         

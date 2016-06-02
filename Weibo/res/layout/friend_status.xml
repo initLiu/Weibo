@@ -104,7 +104,7 @@
             android:layout_height="wrap_content"
             android:text="微博:世事无绝对。都说团结就是力量。全世界的鸡蛋联合起来就能打破石头吗？所以，还是要面对现实。"
             android:textColor="#FFFFFF"
-            android:textSize="50px" />
+            android:textSize="@dimen/text_size_15" />
 
         <com.lzp.weibo.widget.MultiImageView
             android:id="@+id/retweeted_status_pic_urls"
@@ -140,7 +140,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="5dp"
-                android:textSize="60px"
+                android:textSize="@dimen/text_size_20"
                 android:textColor="#DBDBDB"
                 android:layout_gravity="center_vertical" />
         </LinearLayout>
@@ -165,7 +165,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="5dp"
-                android:textSize="60px"
+                android:textSize="@dimen/text_size_20"
                 android:textColor="#DBDBDB"
                 android:layout_gravity="center_vertical"/>
         </LinearLayout>
