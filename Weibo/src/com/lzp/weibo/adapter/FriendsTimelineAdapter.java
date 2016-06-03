@@ -7,6 +7,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.lzp.weibo.R;
 import com.lzp.weibo.text.WeiboText;
+import com.lzp.weibo.text.WeiboText.WeiboTextClicklistener;
 import com.lzp.weibo.widget.CommentLayout;
 import com.lzp.weibo.widget.MultiImageView;
 import com.sina.weibo.sdk.openapi.models.CommentList;
@@ -41,6 +42,7 @@ public class FriendsTimelineAdapter extends BaseAdapter{
 	private static final String TAG = FriendsTimelineAdapter.class.getSimpleName();
 	private StatusList mStatusList;
 	private Context mContext;
+	private WeiboTextClicklistener mTextClicklistener;
 	private Map<String, Integer> mMonths = new HashMap<String, Integer>();
 	{
 		mMonths.put("Jan", 1);
@@ -62,6 +64,10 @@ public class FriendsTimelineAdapter extends BaseAdapter{
 		mStatusList = new StatusList();
 	}
 
+	public void setWeiboTextClicklistener(WeiboTextClicklistener clicklistener){
+		this.mTextClicklistener = clicklistener;
+	}
+	
 	public void setData(StatusList statusList) {
 		if (statusList != null) {
 			mStatusList = statusList;
@@ -136,9 +142,13 @@ public class FriendsTimelineAdapter extends BaseAdapter{
 		holder.textSource.setText(Html.fromHtml(status.source).toString());
 
 		holder.textContent.setSpannableFactory(WeiboText.SPANNABLE_FACTORY);
-		holder.textContent.setMovementMethod(LinkMovementMethod.getInstance());
 		holder.textContent.setLinkTextColor(Color.parseColor("#1C86EE"));
-		holder.textContent.setText(new WeiboText(status.text, WeiboText.GRAB_LINKS));
+		WeiboText weiboText = new WeiboText(status.text, WeiboText.GRAB_LINKS);
+		if (mTextClicklistener != null) {
+			weiboText.setLinkOnClicklistener(mTextClicklistener);
+		}
+		holder.textContent.setText(weiboText);
+		holder.textContent.setMovementMethod(LinkMovementMethod.getInstance());
 
 		if (status.pic_urls != null && !status.pic_urls.isEmpty()) {	
 			//解决listview图片加载错位问题。图片加载错位是由于convertView复用导致的
@@ -179,7 +189,15 @@ public class FriendsTimelineAdapter extends BaseAdapter{
 				sname = status.retweeted_status.user.screen_name;
 			}
 			sb.append("@").append(sname).append(" :").append(status.retweeted_status.text);
-			holder.textRetstatus.setText(new WeiboText(sb.toString(), WeiboText.GRAB_LINKS));
+			holder.textRetstatus.setSpannableFactory(WeiboText.SPANNABLE_FACTORY);
+			weiboText = new WeiboText(sb.toString(), WeiboText.GRAB_LINKS);
+			if (mTextClicklistener != null) {
+				weiboText.setLinkOnClicklistener(mTextClicklistener);
+			}
+			holder.textRetstatus.setText(weiboText);
+			holder.textRetstatus.setLinkTextColor(Color.parseColor("#1C86EE"));
+			holder.textRetstatus.setMovementMethod(LinkMovementMethod.getInstance());
+			
 			if (status.retweeted_status.pic_urls != null && !status.retweeted_status.pic_urls.isEmpty()) {
 				if (holder.multiRetPicUrls.getTag() != null) {
 					holder.multiRetPicUrls.removeAllPictures();

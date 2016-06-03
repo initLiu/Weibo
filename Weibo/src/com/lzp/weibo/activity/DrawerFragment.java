@@ -29,7 +29,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 
-public class DrawerFragment extends Fragment implements OnClickListener, Callback {
+public class DrawerFragment extends BaseFragment implements OnClickListener, Callback {
 
 	public enum DrawerPage {
 		fistePage

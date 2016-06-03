@@ -14,6 +14,7 @@ import com.lzp.weibo.msg.Command;
 import com.lzp.weibo.msg.CommentsManager;
 import com.lzp.weibo.msg.MessageFacade;
 import com.lzp.weibo.msg.MessageFacade.ObserverData;
+import com.lzp.weibo.text.WeiboText.WeiboTextClicklistener;
 import com.lzp.weibo.widget.CommentLayout;
 import com.sina.weibo.sdk.auth.Oauth2AccessToken;
 import com.sina.weibo.sdk.openapi.models.Comment;
@@ -25,6 +26,8 @@ import android.os.Handler;
 import android.os.Handler.Callback;
 import android.os.Message;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v4.widget.SwipeRefreshLayout.OnRefreshListener;
 import android.text.TextUtils;
@@ -43,7 +46,7 @@ import android.widget.Toast;
  * @author SKJP
  *
  */
-public class FirstPageFragment extends Fragment implements OnRefreshListener, OnScrollListener, Callback{
+public class FirstPageFragment extends BaseFragment implements OnRefreshListener, OnScrollListener, Callback{
 
 	public static final String TAG = FirstPageFragment.class.getSimpleName();
 
@@ -64,6 +67,36 @@ public class FirstPageFragment extends Fragment implements OnRefreshListener, On
 	
 	private static final int DELAY_TIME = 2000;
 	private Handler mHandler = new Handler(this);
+
+	private WeiboTextClicklistener mWeiboTextClicklistener = new WeiboTextClicklistener() {
+
+		@Override
+		public void onClick(int type, String content) {
+			switch (type) {
+			case WeiboTextClicklistener.TYPE_URL:
+				// 跳转到web页面
+				FragmentManager manager = FirstPageFragment.this.getActivity().getSupportFragmentManager();
+				FragmentTransaction transaction = manager.beginTransaction();
+				Fragment browserFragment = manager.findFragmentByTag(BrowserFragment.TAG);
+				if (browserFragment != null) {
+					transaction.remove(browserFragment);
+					transaction.hide(FirstPageFragment.this);
+					transaction.add(R.id.content, BrowserFragment.getInstance(content, FirstPageFragment.TAG),
+							BrowserFragment.TAG);
+				} else {
+					transaction.add(R.id.content, BrowserFragment.getInstance(content, FirstPageFragment.TAG),
+							BrowserFragment.TAG);
+					transaction.hide(FirstPageFragment.this);
+				}
+				transaction.hide(FirstPageFragment.this);
+				transaction.commitAllowingStateLoss();
+				break;
+
+			default:
+				break;
+			}
+		}
+	};
 
 	private Observer mStatusListObserver = new Observer() {
 
@@ -111,6 +144,12 @@ public class FirstPageFragment extends Fragment implements OnRefreshListener, On
 	}
 
 	@Override
+	public void onStart() {
+		super.onStart();
+		getActivity().setTitle("首页");
+	}
+
+	@Override
 	public void onViewCreated(View view, Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 		mSwipeRefreshWidget = (SwipeRefreshLayout) view.findViewById(R.id.firstpage_swipe_refresh);
@@ -132,6 +171,7 @@ public class FirstPageFragment extends Fragment implements OnRefreshListener, On
 		mList.removeFooterView(mLoadView);
 		mList.addFooterView(mLoadView);
 		mAdapter = new FriendsTimelineAdapter(getActivity());
+		mAdapter.setWeiboTextClicklistener(mWeiboTextClicklistener);
 		mList.setAdapter(mAdapter);
 		mList.removeFooterView(mLoadView);
 		mList.setOnScrollListener(this);

@@ -31,6 +31,7 @@ import android.text.style.ClickableSpan;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
+import android.view.View.OnClickListener;
 
 public class WeiboText implements Spannable, GetChars, Cloneable {
 
@@ -515,25 +516,29 @@ public class WeiboText implements Spannable, GetChars, Cloneable {
 
 		@Override
 		public void onClick(View widget) {
+			if (mClickListener == null) {
+				return;
+			}
+			
 			String url = mUrl;
 			Matcher m = Patterns.WEB_URL.matcher(url);
 			// 是个链接
 			if (m.find()) {
-				Log.e(TAG, "url");
+				mClickListener.onClick(WeiboTextClicklistener.TYPE_URL, mUrl);
 				return;
 			}
 
 			m = Pattern.compile(TOPIC).matcher(url);
 			// 是个话题
 			if (m.find()) {
-				Log.e(TAG, "topic");
+				mClickListener.onClick(WeiboTextClicklistener.TYPE_TOPIC, mUrl);
 				return;
 			}
 
 			m = Pattern.compile(AT).matcher(url);
 			// 是@
 			if (m.find()) {
-				Log.e(TAG, "@");
+				mClickListener.onClick(WeiboTextClicklistener.TYPE_AT, mUrl);
 				return;
 			}
 		}
@@ -551,6 +556,20 @@ public class WeiboText implements Spannable, GetChars, Cloneable {
 		return clone;
 	}
 
+	public void setLinkOnClicklistener(WeiboTextClicklistener listener){
+		mClickListener = listener;
+	}
+	
+	public interface WeiboTextClicklistener {
+		public static final int TYPE_URL = 0;
+		public static final int TYPE_TOPIC = 1;
+		public static final int TYPE_AT = 2;
+
+		public void onClick(int type, String content);
+	}
+
+	private WeiboTextClicklistener mClickListener;
+	
 	// 原数据
 	public String mSource;
 	private String mText;
@@ -662,5 +681,4 @@ public class WeiboText implements Spannable, GetChars, Cloneable {
 	static final Pattern LINK_PATTERN = Pattern.compile(LINK_REGEX);
 
 	public static final String TAG = WeiboText.class.getSimpleName();
-
 }
