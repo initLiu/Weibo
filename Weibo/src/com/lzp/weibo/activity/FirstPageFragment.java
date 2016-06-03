@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
 
+import com.bumptech.glide.Glide;
 import com.lzp.weibo.R;
 import com.lzp.weibo.adapter.FriendsTimelineAdapter;
 import com.lzp.weibo.app.AccessTokenKeeper;
@@ -168,6 +169,12 @@ public class FirstPageFragment extends Fragment implements OnRefreshListener, On
 	public void onScrollStateChanged(AbsListView view, int scrollState) {
 		if (scrollState == 0 && mShowLoading) {
 			getHistory();
+		}
+		
+		if (scrollState == SCROLL_STATE_IDLE) {
+			Glide.with(this).resumeRequests();
+		} else {
+			Glide.with(this).pauseRequests();
 		}
 	}
 
